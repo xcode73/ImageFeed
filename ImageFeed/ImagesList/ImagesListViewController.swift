@@ -37,19 +37,20 @@ extension ImagesListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath)
         
-        guard let imageListCell = cell as? ImagesListCell else {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: ImagesListCell.reuseIdentifier,
+            for: indexPath
+        ) as? ImagesListCell else {
             return UITableViewCell()
         }
         
-        configCell(for: imageListCell, with: indexPath)
-        return imageListCell
+        configCell(for: cell, with: indexPath)
+        return cell
     }
 }
 
 extension ImagesListViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) { }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         guard let image = UIImage(named: photosName[indexPath.row]) else {
@@ -74,8 +75,7 @@ extension ImagesListViewController {
         cell.cardImageView.image = image
         cell.dateLabel.text = dateFormatter.string(from: Date())
         
-        let isLiked = indexPath.row % 2 == 0
-        let likeIcon = isLiked ? UIImage(named: "ic.like.active") : UIImage(named: "ic.like.not.active")
+        let likeIcon = indexPath.row % 2 == 0 ? UIImage(named: "ic.like.active") : UIImage(named: "ic.like.not.active")
         cell.likeButton.setImage(likeIcon, for: .normal)
     }
 }
