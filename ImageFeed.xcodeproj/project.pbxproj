@@ -15,6 +15,7 @@
 		910DD48B2C0C3B9300D57949 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 910DD48A2C0C3B9300D57949 /* Base */; };
 		910DD4B32C0DAC2000D57949 /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910DD4B22C0DAC2000D57949 /* ImagesListCell.swift */; };
 		910DD4B62C0EDC4900D57949 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910DD4B52C0EDC4900D57949 /* GradientView.swift */; };
+		913CAEC52C197FC50033CCD7 /* ImagesListCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 913CAEC42C197FC50033CCD7 /* ImagesListCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		910DD4B22C0DAC2000D57949 /* ImagesListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesListCell.swift; sourceTree = "<group>"; };
 		910DD4B52C0EDC4900D57949 /* GradientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		910DD4D42C10418B00D57949 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		913CAEC42C197FC50033CCD7 /* ImagesListCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImagesListCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 				910DD4822C0C3B9200D57949 /* ImagesListViewController.swift */,
 				910DD4B22C0DAC2000D57949 /* ImagesListCell.swift */,
 				910DD4B52C0EDC4900D57949 /* GradientView.swift */,
+				913CAEC42C197FC50033CCD7 /* ImagesListCell.xib */,
 			);
 			path = ImagesList;
 			sourceTree = "<group>";
@@ -142,6 +145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				910DD4882C0C3B9300D57949 /* Assets.xcassets in Resources */,
+				913CAEC52C197FC50033CCD7 /* ImagesListCell.xib in Resources */,
 				910DD48B2C0C3B9300D57949 /* Base in Resources */,
 				910DD4862C0C3B9200D57949 /* Base in Resources */,
 			);

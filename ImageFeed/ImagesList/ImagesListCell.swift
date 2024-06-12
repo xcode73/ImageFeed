@@ -10,7 +10,6 @@ import UIKit
 final class ImagesListCell: UITableViewCell {
     
     static let reuseIdentifier = "ImagesListCell"
-    
 
     @IBOutlet
     private var cardView: UIView! {
@@ -20,18 +19,22 @@ final class ImagesListCell: UITableViewCell {
         }
     }
     
+    @IBOutlet 
+    private var cardImageView: UIImageView!
     
     @IBOutlet 
-    weak var cardImageView: UIImageView!
+    private var likeButton: UIButton!
     
-    
-    
-    @IBOutlet
-    weak var likeButton: UIButton!
-    
-    
-    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet 
+    private var dateLabel: UILabel!
     
 
+    func configureCell(image: UIImage?, date: String, isLiked: Bool) {
+        cardImageView.image = image
+        dateLabel.text = date
+
+        let likeIcon = isLiked ? UIImage(named: "ic.like.active") : UIImage(named: "ic.like.not.active")
+        likeButton.setImage(likeIcon, for: .normal)
+    }
 
 }

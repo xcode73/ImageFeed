@@ -27,31 +27,39 @@ final class ImagesListViewController: UIViewController {
         
         overrideUserInterfaceStyle = .dark
         
+        tableView.delegate = self
+        tableView.dataSource = self
+        
+        tableView.register(UINib(nibName: "ImagesListCell", bundle: nil),
+                           forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
     }
 }
 
+// MARK: - UITableViewDataSource
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return photosName.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: ImagesListCell.reuseIdentifier,
             for: indexPath
         ) as? ImagesListCell else {
             return UITableViewCell()
         }
-        
-        configCell(for: cell, with: indexPath)
+
+        let image = UIImage(named: photosName[indexPath.row])
+        let date = dateFormatter.string(from: Date())
+        let isLiked = indexPath.row % 2 == 0
+        cell.configureCell(image: image, date: date, isLiked: isLiked)
         return cell
     }
 }
 
+// MARK: - UITableViewDelegate
 extension ImagesListViewController: UITableViewDelegate {
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         guard let image = UIImage(named: photosName[indexPath.row]) else {
             return 0
@@ -65,18 +73,3 @@ extension ImagesListViewController: UITableViewDelegate {
         return cellHeight
     }
 }
-
-extension ImagesListViewController {
-    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
-            return
-        }
-        
-        cell.cardImageView.image = image
-        cell.dateLabel.text = dateFormatter.string(from: Date())
-        
-        let likeIcon = indexPath.row % 2 == 0 ? UIImage(named: "ic.like.active") : UIImage(named: "ic.like.not.active")
-        cell.likeButton.setImage(likeIcon, for: .normal)
-    }
-}
-
