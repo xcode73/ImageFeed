@@ -7,34 +7,22 @@
 
 import UIKit
 
-final class ImagesListCell: UITableViewCell {
-    
-    static let reuseIdentifier = "ImagesListCell"
+class ImagesListCell: UITableViewCell {
 
     @IBOutlet
-    private var cardView: UIView! {
+    weak var cardView: UIView! {
         didSet {
             cardView.layer.masksToBounds = true
             cardView.layer.cornerRadius = 16
         }
     }
     
-    @IBOutlet 
-    private var cardImageView: UIImageView!
+    @IBOutlet
+    weak var cardImageView: UIImageView!
     
-    @IBOutlet 
-    private var likeButton: UIButton!
+    @IBOutlet
+    weak var likeButton: UIButton!
     
-    @IBOutlet 
-    private var dateLabel: UILabel!
-    
-
-    func configureCell(image: UIImage?, date: String, isLiked: Bool) {
-        cardImageView.image = image
-        dateLabel.text = date
-
-        let likeIcon = isLiked ? UIImage(named: "ic.like.active") : UIImage(named: "ic.like.not.active")
-        likeButton.setImage(likeIcon, for: .normal)
-    }
-
+    @IBOutlet
+    weak var dateLabel: UILabel!
 }
