@@ -9,7 +9,7 @@ import Foundation
 
 enum Endpoint {
     
-    case fetchCode(url: String = "/oauth/authorize")
+    case authorize(url: String = "/oauth/authorize")
     case sendCode(url: String = "/oauth/token", code: String)
     
     var request: URLRequest? {
@@ -33,14 +33,14 @@ enum Endpoint {
     
     private var path: String {
         switch self {
-        case .fetchCode(let url): return url
+        case .authorize(let url): return url
         case .sendCode(let url, _): return url
         }
     }
     
     private var queryItems: [URLQueryItem] {
         switch self {
-        case .fetchCode:
+        case .authorize:
             return [
                 URLQueryItem(name: "client_id", value: Constants.accessKey),
                 URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
@@ -60,7 +60,7 @@ enum Endpoint {
     
     private var httpMethod: String {
         switch self {
-        case .fetchCode:
+        case .authorize:
             return HTTP.Method.get.rawValue
         case .sendCode:
             return HTTP.Method.post.rawValue
@@ -69,7 +69,7 @@ enum Endpoint {
     
     private var httpBody: Data? {
         switch self {
-        case .fetchCode:
+        case .authorize:
             return nil
         case .sendCode(_, let code):
             let jsonPost = try? JSONEncoder().encode(code)
@@ -82,7 +82,7 @@ extension URLRequest {
     
     mutating func addValues(for endpoint: Endpoint) {
         switch endpoint {
-        case .fetchCode:
+        case .authorize:
             break
         case .sendCode:
             self.setValue(

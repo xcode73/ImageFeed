@@ -8,13 +8,19 @@
 import UIKit
 import WebKit
 
-enum WebViewConstants {
-    static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
+protocol WebViewViewControllerDelegate: AnyObject {
+    /// WebViewViewController получил код
+    /// - Parameters:
+    ///   - vc: ViewController
+    ///   - code: код из url
+    func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String)
+    /// пользователь нажал кнопку назад и отменил авторизацию
+    /// - Parameter vc: ViewController
+    func webViewViewControllerDidCancel(_ vc: WebViewViewController)
 }
 
 final class WebViewViewController: UIViewController {
     
-    let service = APIService()
     weak var delegate: WebViewViewControllerDelegate?
     
     // MARK: - Outlets
@@ -24,8 +30,7 @@ final class WebViewViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // NOTE: Since the class is marked as `final` we don't need to pass a context.
-        // In case of inhertiance context must not be nil.
+        
         webView.addObserver(
             self,
             forKeyPath: #keyPath(WKWebView.estimatedProgress),
@@ -74,37 +79,31 @@ final class WebViewViewController: UIViewController {
 // MARK: - Private
 private extension WebViewViewController {
     func loadAuthView() {
-//        guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-//            print("Error: cannot create URLComponents")
-//            return
-//        }
-//        
-//        urlComponents.queryItems = [
-//            URLQueryItem(name: "client_id", value: Constants.accessKey),
-//            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
-//            URLQueryItem(name: "response_type", value: "code"),
-//            URLQueryItem(name: "scope", value: Constants.accessScope)
-//        ]
-//        
-//        guard let url = urlComponents.url else {
-//            print("ERROR: cannot create URL")
-//            return
-//        }
-        
-//        let request = URLRequest(url: url)
-        guard let request = Endpoint.fetchCode().request else {
+        guard let request = Endpoint.authorize().request else {
             print("ERROR: cannot create URL")
             return
         }
-        
-        print("INFO: Auth request:", request)
-        
+        print("DEBUG PRINT: Auth request:", request)
         webView.load(request)
     }
     
     func updateProgress() {
         progressView.progress = Float(webView.estimatedProgress)
         progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+    }
+    
+    func code(from navigationAction: WKNavigationAction) -> String? {
+        if
+            let url = navigationAction.request.url,
+            let urlComponents = URLComponents(string: url.absoluteString),
+            urlComponents.path == "/oauth/authorize/native",
+            let items = urlComponents.queryItems,
+            let codeItem = items.first(where: { $0.name == "code" })
+        {
+            return codeItem.value
+        } else {
+            return nil
+        }
     }
 }
 
@@ -121,20 +120,8 @@ extension WebViewViewController: WKNavigationDelegate {
             decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)
-        }
-    }
-    
-    private func code(from navigationAction: WKNavigationAction) -> String? {
-        if
-            let url = navigationAction.request.url,
-            let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.path == "/oauth/authorize/native",
-            let items = urlComponents.queryItems,
-            let codeItem = items.first(where: { $0.name == "code" })
-        {
-            return codeItem.value
-        } else {
-            return nil
+            // print redirection url
+            print("DEBUG: Redirecting to", navigationAction.request.url ?? "no url")
         }
     }
 }

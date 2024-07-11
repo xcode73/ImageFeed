@@ -7,9 +7,16 @@
 
 import UIKit
 
+protocol AuthViewControllerDelegate: AnyObject {
+    func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String)
+}
+
 final class AuthViewController: UIViewController {
     private let ShowWebViewSegueIdentifier = "ShowWebView"
     private let oauth2Service = OAuth2Service.shared
+    private let tokenStorage = OAuth2TokenStorage()
+    
+    weak var delegate: AuthViewControllerDelegate?
     
     @IBOutlet
     private var authButton: UIButton! {
@@ -45,12 +52,15 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        vc.dismiss(animated: true)
+        
         oauth2Service.fetchOAuthToken(code: code) { result in
             switch result {
             case .success(let token):
-                self.performSegue(withIdentifier: self.ShowWebViewSegueIdentifier, sender: self)
+                self.tokenStorage.token = token
+                self.delegate?.authViewController(self, didAuthenticateWithCode: token)
             case .failure(let error):
-                print(error)
+                print("Error: \(error.localizedDescription)")
             }
         }
     }
