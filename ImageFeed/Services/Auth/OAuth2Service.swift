@@ -11,8 +11,6 @@ protocol OAuthTokenLoading {
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void)
 }
 
-
-
 final class OAuth2Service {
     static let shared = OAuth2Service()
     
@@ -46,8 +44,7 @@ final class OAuth2Service {
                     let token = try decoder.decode(OAuthTokenResponseBody.self, from: data)
                     completion(.success(token.accessToken))
                 } catch {
-//                    let error = NSError(domain: "com.example.oauth2", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to decode token"])
-                    
+                    print("ERROR: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
             case .failure(let error):

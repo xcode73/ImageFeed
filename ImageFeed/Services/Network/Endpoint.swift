@@ -72,14 +72,19 @@ enum Endpoint {
         case .authorize:
             return nil
         case .sendCode(_, let code):
-            let jsonPost = try? JSONEncoder().encode(code)
-            return jsonPost
+            do {
+                let jsonPost = try JSONEncoder().encode(code)
+                return jsonPost
+            } catch {
+                print("ERROR: \(error.localizedDescription)")
+                return nil
+            }
         }
     }
 }
 
+// MARK: - Request
 extension URLRequest {
-    
     mutating func addValues(for endpoint: Endpoint) {
         switch endpoint {
         case .authorize:

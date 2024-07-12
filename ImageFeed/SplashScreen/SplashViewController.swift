@@ -66,7 +66,6 @@ extension SplashViewController: AuthViewControllerDelegate {
     }
     
     private func fetchOAuthToken(_ code: String) {
-//        guard let request = Endpoint.sendCode(code: code).request else { return }
         oauth2Service.fetchOAuthToken(code: code, completion: { [weak self] result in
             guard let self = self else { return }
             switch result {

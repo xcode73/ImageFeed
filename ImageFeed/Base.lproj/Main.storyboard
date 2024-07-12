@@ -38,7 +38,7 @@
                                     <color key="titleColor" name="YPBlack"/>
                                 </state>
                                 <connections>
-                                    <segue destination="xXB-mn-Y7l" kind="presentation" identifier="ShowWebView" modalPresentationStyle="fullScreen" modalTransitionStyle="coverVertical" id="DaP-LD-Uuc"/>
+                                    <segue destination="xXB-mn-Y7l" kind="show" identifier="ShowWebView" animates="NO" id="DaP-LD-Uuc"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -69,29 +69,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Lv-zg-Iec">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                            <wkWebView contentMode="scaleAspectFit" customUserAgent="safari" translatesAutoresizingMaskIntoConstraints="NO" id="3Lv-zg-Iec">
+                                <rect key="frame" x="0.0" y="44" width="414" height="852"/>
                                 <color key="backgroundColor" name="YPWhite"/>
-                                <wkWebViewConfiguration key="configuration">
-                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
-                                    <wkPreferences key="preferences"/>
+                                <wkWebViewConfiguration key="configuration" allowsInlineMediaPlayback="YES" applicationNameForUserAgent="ImageFeed">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" audio="YES" video="YES"/>
+                                    <wkPreferences key="preferences" javaScriptCanOpenWindowsAutomatically="YES"/>
                                 </wkWebViewConfiguration>
                             </wkWebView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GsH-CT-QCn">
-                                <rect key="frame" x="0.0" y="0.0" width="64" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="7hd-vX-NyN"/>
-                                    <constraint firstAttribute="width" constant="64" id="CSR-Az-K9o"/>
-                                </constraints>
-                                <color key="tintColor" name="YPBlack"/>
-                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                <state key="normal" image="ic.backward"/>
-                                <connections>
-                                    <action selector="didTapBackButton:" destination="xXB-mn-Y7l" eventType="touchUpInside" id="akL-dM-EoW"/>
-                                </connections>
-                            </button>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="KWE-rm-XmO">
-                                <rect key="frame" x="0.0" y="40" width="414" height="4"/>
+                                <rect key="frame" x="0.0" y="44" width="414" height="4"/>
                                 <color key="progressTintColor" name="YPBlack"/>
                             </progressView>
                         </subviews>
@@ -99,14 +86,12 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="KWE-rm-XmO" firstAttribute="leading" secondItem="8D7-vK-zSu" secondAttribute="leading" id="1fb-l8-PaV"/>
-                            <constraint firstItem="KWE-rm-XmO" firstAttribute="top" secondItem="8D7-vK-zSu" secondAttribute="top" constant="40" id="6TS-Bi-Xo3"/>
-                            <constraint firstItem="GsH-CT-QCn" firstAttribute="leading" secondItem="8D7-vK-zSu" secondAttribute="leading" id="Ke8-IT-htO"/>
-                            <constraint firstItem="3Lv-zg-Iec" firstAttribute="top" secondItem="DxN-13-1Ut" secondAttribute="top" id="Lfm-lL-6eZ"/>
-                            <constraint firstAttribute="trailing" secondItem="3Lv-zg-Iec" secondAttribute="trailing" id="YlK-ea-NSB"/>
-                            <constraint firstItem="3Lv-zg-Iec" firstAttribute="leading" secondItem="DxN-13-1Ut" secondAttribute="leading" id="Z0R-rt-uNO"/>
-                            <constraint firstAttribute="bottom" secondItem="3Lv-zg-Iec" secondAttribute="bottom" id="fan-Lh-Aeh"/>
+                            <constraint firstItem="3Lv-zg-Iec" firstAttribute="width" secondItem="8D7-vK-zSu" secondAttribute="width" id="3Z9-tr-VAQ"/>
+                            <constraint firstItem="KWE-rm-XmO" firstAttribute="top" secondItem="8D7-vK-zSu" secondAttribute="top" id="6TS-Bi-Xo3"/>
+                            <constraint firstItem="3Lv-zg-Iec" firstAttribute="centerY" secondItem="8D7-vK-zSu" secondAttribute="centerY" id="Nwn-UP-afe"/>
+                            <constraint firstItem="3Lv-zg-Iec" firstAttribute="height" secondItem="8D7-vK-zSu" secondAttribute="height" id="kzo-F9-ceN"/>
+                            <constraint firstItem="3Lv-zg-Iec" firstAttribute="centerX" secondItem="8D7-vK-zSu" secondAttribute="centerX" id="n8m-gM-2zv"/>
                             <constraint firstItem="8D7-vK-zSu" firstAttribute="trailing" secondItem="KWE-rm-XmO" secondAttribute="trailing" id="ny5-bk-u6H"/>
-                            <constraint firstItem="GsH-CT-QCn" firstAttribute="top" secondItem="8D7-vK-zSu" secondAttribute="top" id="yc5-8v-gyH"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="lmK-EF-pWA"/>

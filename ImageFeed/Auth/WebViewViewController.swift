@@ -55,7 +55,7 @@ final class WebViewViewController: UIViewController {
         webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
     }
     
-    // MARK: - Methods
+    // MARK: - KVO
     override func observeValue(
         forKeyPath keyPath: String?,
         of object: Any?,
@@ -68,12 +68,6 @@ final class WebViewViewController: UIViewController {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
-    
-    // MARK: - Actions
-    @IBAction func didTapBackButton(_ sender: Any) {
-        delegate?.webViewViewControllerDidCancel(self)
-    }
-    
 }
 
 // MARK: - Private
@@ -109,7 +103,6 @@ private extension WebViewViewController {
 
 // MARK: - WKNavigationDelegate
 extension WebViewViewController: WKNavigationDelegate {
-    // Этот метод вызывается, когда в результате действий пользователя WKWebView готовится совершить навигационные действия (например, загрузить новую страницу). Благодаря этому мы узнаем, когда пользователь успешно авторизовался.
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
@@ -120,8 +113,6 @@ extension WebViewViewController: WKNavigationDelegate {
             decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)
-            // print redirection url
-            print("DEBUG: Redirecting to", navigationAction.request.url ?? "no url")
         }
     }
 }
