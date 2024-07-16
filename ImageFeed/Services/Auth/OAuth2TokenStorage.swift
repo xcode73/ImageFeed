@@ -8,15 +8,15 @@
 import Foundation
 
 final class OAuth2TokenStorage {
-    private let storage = UserDefaults.standard
-    private let key = "BearerToken"
+    
+    private let userDefaults = UserDefaults.standard
     
     var token: String? {
         get {
-            return storage.string(forKey: key)
+            userDefaults.string(forKey: "token")
         }
         set {
-            storage.set(newValue, forKey: key)
+            userDefaults.set(newValue, forKey: "token")
         }
     }
 }

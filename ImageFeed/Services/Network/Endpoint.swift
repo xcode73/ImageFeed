@@ -13,7 +13,10 @@ enum Endpoint {
     case sendCode(url: String = "/oauth/token", code: String)
     
     var request: URLRequest? {
-        guard let url = self.url else { return nil }
+        guard let url = self.url else {
+            print("ERROR: cannot create URL")
+            return nil
+        }
         var request = URLRequest(url: url)
         request.httpMethod = self.httpMethod
         request.httpBody = self.httpBody
@@ -33,8 +36,10 @@ enum Endpoint {
     
     private var path: String {
         switch self {
-        case .authorize(let url): return url
-        case .sendCode(let url, _): return url
+        case .authorize(let url):
+            return url
+        case .sendCode(let url, _):
+            return url
         }
     }
     
@@ -71,20 +76,23 @@ enum Endpoint {
         switch self {
         case .authorize:
             return nil
-        case .sendCode(_, let code):
-            do {
-                let jsonPost = try JSONEncoder().encode(code)
-                return jsonPost
-            } catch {
-                print("ERROR: \(error.localizedDescription)")
-                return nil
-            }
+        case .sendCode:
+            return nil
+//            do {
+//                let jsonPost = try JSONEncoder().encode(code)
+//                return jsonPost
+//            } catch {
+//                print("ERROR: \(error.localizedDescription)")
+//                return nil
+//            }
         }
     }
 }
 
 // MARK: - Request
-extension URLRequest {
+private extension URLRequest {
+    /// Add HTTP headers
+    /// - Parameter endpoint: Endpoint
     mutating func addValues(for endpoint: Endpoint) {
         switch endpoint {
         case .authorize:
