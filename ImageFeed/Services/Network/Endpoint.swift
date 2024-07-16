@@ -23,9 +23,9 @@ enum Endpoint {
     
     private var url: URL? {
         var components = URLComponents()
-        components.scheme = Constants.scheme
-        components.host = Constants.baseURL
-        components.port = Constants.port
+        components.scheme = Constants.API.scheme
+        components.host = Constants.API.baseURL
+        components.port = Constants.API.port
         components.path = self.path
         components.queryItems = self.queryItems
         return components.url
@@ -42,16 +42,16 @@ enum Endpoint {
         switch self {
         case .authorize:
             return [
-                URLQueryItem(name: "client_id", value: Constants.accessKey),
-                URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
+                URLQueryItem(name: "client_id", value: Constants.API.accessKey),
+                URLQueryItem(name: "redirect_uri", value: Constants.API.redirectURI),
                 URLQueryItem(name: "response_type", value: "code"),
-                URLQueryItem(name: "scope", value: Constants.accessScope)
+                URLQueryItem(name: "scope", value: Constants.API.accessScope)
             ]
         case .sendCode(_, let code):
             return [
-                URLQueryItem(name: "client_id", value: Constants.accessKey),
-                URLQueryItem(name: "client_secret", value: Constants.secretKey),
-                URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
+                URLQueryItem(name: "client_id", value: Constants.API.accessKey),
+                URLQueryItem(name: "client_secret", value: Constants.API.secretKey),
+                URLQueryItem(name: "redirect_uri", value: Constants.API.redirectURI),
                 URLQueryItem(name: "code", value: code),
                 URLQueryItem(name: "grant_type", value: "authorization_code")
             ]
