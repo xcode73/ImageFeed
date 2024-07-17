@@ -29,6 +29,7 @@
 		91E7F0592C3ECC4300D9515B /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E7F0582C3ECC4300D9515B /* SplashViewController.swift */; };
 		91E7F05C2C3FA8B300D9515B /* OAuth2Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E7F05B2C3FA8B300D9515B /* OAuth2Service.swift */; };
 		91E7F05F2C3FAA5000D9515B /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E7F05E2C3FAA5000D9515B /* NetworkClient.swift */; };
+		91F9A8792C47EFFB003E2B3A /* ProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 91F9A8782C47EFFB003E2B3A /* ProgressHUD */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91F9A8792C47EFFB003E2B3A /* ProgressHUD in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,6 +243,9 @@
 				Base,
 			);
 			mainGroup = 910DD4722C0C3B9200D57949;
+			packageReferences = (
+				91F9A8772C47EFFB003E2B3A /* XCRemoteSwiftPackageReference "ProgressHUD" */,
+			);
 			productRefGroup = 910DD47C2C0C3B9200D57949 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -523,6 +528,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		91F9A8772C47EFFB003E2B3A /* XCRemoteSwiftPackageReference "ProgressHUD" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/relatedcode/ProgressHUD";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 14.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		91F9A8782C47EFFB003E2B3A /* ProgressHUD */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 91F9A8772C47EFFB003E2B3A /* XCRemoteSwiftPackageReference "ProgressHUD" */;
+			productName = ProgressHUD;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 910DD4732C0C3B9200D57949 /* Project object */;
 }
