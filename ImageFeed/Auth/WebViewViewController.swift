@@ -20,7 +20,6 @@ protocol WebViewViewControllerDelegate: AnyObject {
 }
 
 final class WebViewViewController: UIViewController {
-    
     weak var delegate: WebViewViewControllerDelegate?
     
     // MARK: - Outlets
@@ -28,6 +27,15 @@ final class WebViewViewController: UIViewController {
     @IBOutlet private var progressView: UIProgressView!
     
     // MARK: - Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        webView.navigationDelegate = self
+        
+        loadAuthView()
+        print("DEBUG:", "WebView loaded")
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -35,24 +43,19 @@ final class WebViewViewController: UIViewController {
             self,
             forKeyPath: #keyPath(WKWebView.estimatedProgress),
             options: .new,
-            context: nil)
+            context: nil
+        )
         updateProgress()
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
         
-        webView.navigationDelegate = self
-        
-        progressView.progress = 0
-        loadAuthView()
-        updateProgress()
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        
-        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
+        webView.removeObserver(
+            self,
+            forKeyPath: #keyPath(WKWebView.estimatedProgress),
+            context: nil
+        )
     }
     
     // MARK: - KVO
@@ -65,7 +68,12 @@ final class WebViewViewController: UIViewController {
         if keyPath == #keyPath(WKWebView.estimatedProgress) {
             updateProgress()
         } else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+            super.observeValue(
+                forKeyPath: keyPath,
+                of: object,
+                change: change,
+                context: context
+            )
         }
     }
 }
@@ -77,8 +85,10 @@ private extension WebViewViewController {
             print("ERROR: cannot create URL")
             return
         }
-        print("DEBUG PRINT: Auth request:", request)
+        
         webView.load(request)
+        
+        updateProgress()
     }
     
     func updateProgress() {
@@ -106,10 +116,11 @@ extension WebViewViewController: WKNavigationDelegate {
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
-        decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
         if let code = code(from: navigationAction) {
             delegate?.webViewViewController(self, didAuthenticateWithCode: code)
+            print("DEBUG:", "WebViewViewController Delegate called")
             decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)

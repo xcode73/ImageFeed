@@ -9,14 +9,19 @@ import Foundation
 
 final class OAuth2TokenStorage {
     
-    private let userDefaults = UserDefaults.standard
+    private let storage = UserDefaults.standard
+    private let tokenKey = "token"
     
     var token: String? {
         get {
-            userDefaults.string(forKey: "token")
+            storage.string(forKey: tokenKey)
         }
         set {
-            userDefaults.set(newValue, forKey: "token")
+            if let token = newValue {
+                storage.set(token, forKey: tokenKey)
+            } else {
+                storage.removeObject(forKey: tokenKey)
+            }
         }
     }
 }

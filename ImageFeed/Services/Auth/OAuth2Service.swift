@@ -20,10 +20,10 @@ final class OAuth2Service {
     
     private(set) var authToken: String? {
         get {
-            return OAuth2TokenStorage().token
+            return tokenStorage.token
         }
         set {
-            OAuth2TokenStorage().token = newValue
+            tokenStorage.token = newValue
         }
     }
 
@@ -38,6 +38,7 @@ final class OAuth2Service {
     ///
     /// It uses the NetworkClient to perform the network request, and upon receiving a response, it decodes the token from the response data using a JSONDecoder.
     /// Finally, it calls the completion handler with the result of the token retrieval operation.
+    /// network client
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let request = Endpoint.sendCode(code: code).request else {
             fatalError("cannot create URL")
@@ -54,8 +55,10 @@ final class OAuth2Service {
                     let decoder = JSONDecoder()
                     decoder.keyDecodingStrategy = .convertFromSnakeCase
                     let oAuthToken = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    self.authToken = oAuthToken.accessToken
-                    print("DEBUG: OAuth token: \(oAuthToken.accessToken) stored in tokenStorage")
+                    print("DEBUG:", "OAuth token: \(oAuthToken) decoded")
+                    let accessToken = oAuthToken.accessToken
+                    self.authToken = accessToken
+                    print("DEBUG:", "OAuth token: \(accessToken) stored in tokenStorage")
                     completion(.success(oAuthToken.accessToken))
                 } catch {
                     print("ERROR: JSON decoding error \(error.localizedDescription)")

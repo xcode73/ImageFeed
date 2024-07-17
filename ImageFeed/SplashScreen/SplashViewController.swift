@@ -9,17 +9,19 @@ import UIKit
 
 final class SplashViewController: UIViewController {
     private let storage = OAuth2TokenStorage()
-    private let oauth2Service = OAuth2Service.shared
     private let showAuthenticationScreenSegueIdentifier = "ShowAuth"
     
     // MARK: - Lifecycle
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if storage.token == nil {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
-        } else {
+        print("DEBUG:", "SplashVC Token: \(storage.token ?? "no token")")
+        if storage.token != nil {
             switchToTabBarController()
+            print("DEBUG:", "Switched to TabBarController")
+        } else {
+            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            print("DEBUG:", "Performed Segue to AuthViewController")
         }
     }
     
@@ -27,14 +29,17 @@ final class SplashViewController: UIViewController {
         super.viewWillAppear(animated)
         setNeedsStatusBarAppearanceUpdate()
     }
-    
+}
+
+extension SplashViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showAuthenticationScreenSegueIdentifier {
             guard
                 let navigationController = segue.destination as? UINavigationController,
                 let viewController = navigationController.viewControllers[0] as? AuthViewController
             else {
-                fatalError("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
+                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
+                return
             }
             viewController.delegate = self
         } else {
@@ -43,9 +48,7 @@ final class SplashViewController: UIViewController {
     }
 }
 
-// MARK: - Segue
 private extension SplashViewController {
-    
     func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else {
             assertionFailure("Invalid window configuration")
@@ -58,25 +61,15 @@ private extension SplashViewController {
         window.rootViewController = tabBarController
     }
     
-    func fetchOAuthToken(with code: String) {
-        oauth2Service.fetchOAuthToken(code: code, completion: { [weak self] result in
-            guard let self else {
-                preconditionFailure("Error: self is nil")
-            }
-            switch result {
-            case .success:
-                dismiss(animated: true)
-                self.switchToTabBarController()
-            case .failure(let error):
-                print(error)
-            }
-        })
-    }
 }
 
 // MARK: - AuthViewControllerDelegate
 extension SplashViewController: AuthViewControllerDelegate {
-    func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        fetchOAuthToken(with: code)
+    func didAuthenticate(_ vc: AuthViewController) {
+        vc.dismiss(animated: true)
+        print("DEBUG:", "AuthViewController dismissed")
+        
+        switchToTabBarController()
+        print("DEBUG:", "Switched to TabBarController")
     }
 }
