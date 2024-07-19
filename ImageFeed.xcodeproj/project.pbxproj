@@ -193,11 +193,11 @@
 		91E7F05D2C3FAA0A00D9515B /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				91F9A87A2C4A2322003E2B3A /* URLSession+data.swift */,
+				91E7F05E2C3FAA5000D9515B /* NetworkClient.swift */,
 				91E7F0512C3E640100D9515B /* HTTP.swift */,
 				91E7F0532C3E642D00D9515B /* Endpoint.swift */,
-				91E7F05E2C3FAA5000D9515B /* NetworkClient.swift */,
 				9131B97E2C2D332B00C8F344 /* Constants.swift */,
-				91F9A87A2C4A2322003E2B3A /* URLSession+data.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
