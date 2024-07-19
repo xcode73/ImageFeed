@@ -19,6 +19,5 @@ struct Constants {
         static let baseURL = "unsplash.com"
         static let port: Int? = nil
         static let defaultBaseURL: URL = URL(staticString: "https://api.unsplash.com")
-        
     }
 }

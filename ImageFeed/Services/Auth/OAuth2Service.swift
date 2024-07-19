@@ -7,16 +7,19 @@
 
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 /// Fetch an OAuth token by making a network request
 final class OAuth2Service {
-    static let shared = OAuth2Service(networkClient: NetworkClient())
+    static let shared = OAuth2Service()
     
     private let tokenStorage = OAuth2TokenStorage()
-    private let networkClient: NetworkRouting
+    private let urlSession = URLSession.shared
     
-    private enum JSONError: Error {
-        case decodingError
-    }
+    private var lastCode: String?
+    private var task: URLSessionTask?
     
     private(set) var authToken: String? {
         get {
@@ -26,10 +29,8 @@ final class OAuth2Service {
             tokenStorage.token = newValue
         }
     }
-
-    private init(networkClient: NetworkRouting) {
-        self.networkClient = networkClient
-    }
+    
+    private init() { }
     
     /// Fetch an OAuth token by making a network request
     /// - Parameters:
@@ -39,34 +40,47 @@ final class OAuth2Service {
     /// It uses the NetworkClient to perform the network request, and upon receiving a response, it decodes the token from the response data using a JSONDecoder.
     /// Finally, it calls the completion handler with the result of the token retrieval operation.
     /// network client
-    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let request = Endpoint.sendCode(code: code).request else {
+    func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        guard
+            let request = Endpoint.sendCode(code: code).request
+        else {
+            completion(.failure(AuthServiceError.invalidRequest))
             fatalError("cannot create URL")
         }
         
-        print("DEBUG:", "Auth request: \(request)")
-        
-        networkClient.fetch(request: request) { [weak self] result in
+        let task = makeOAuthToken(for: request) { [weak self] result in
             guard let self = self else { return }
-            
+            switch result {
+            case .success(let body):
+                let authToken = body.accessToken
+                self.authToken = authToken
+                completion(.success(authToken))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+}
+
+// MARK: - Network Client
+extension OAuth2Service {
+    private func makeOAuthToken(for request: URLRequest, completion: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) -> URLSessionTask {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return urlSession.data(for: request) { (result: Result<Data, Error>) in
             switch result {
             case .success(let data):
                 do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let oAuthToken = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    print("DEBUG:", "OAuth token: \(oAuthToken) decoded")
-                    let accessToken = oAuthToken.accessToken
-                    self.authToken = accessToken
-                    print("DEBUG:", "OAuth token: \(accessToken) stored in tokenStorage")
-                    completion(.success(oAuthToken.accessToken))
-                } catch {
-                    print("ERROR: JSON decoding error \(error.localizedDescription)")
-                    completion(.failure(JSONError.decodingError))
+                    let body = try decoder.decode(OAuthTokenResponseBody.self, from: data)
+                    completion(.success(body))
                 }
+                catch {
+                    completion(.failure(NetworkError.decodingError(error)))
+                }
+                
             case .failure(let error):
                 completion(.failure(error))
-                print("ERROR: \(error.localizedDescription)")
             }
         }
     }

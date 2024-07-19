@@ -59,7 +59,7 @@ private extension AuthViewController {
     }
     
     private func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        oauth2Service.fetchOAuthToken(code: code) { result in
+        oauth2Service.fetchOAuthToken(code) { result in
             completion(result)
         }
     }
