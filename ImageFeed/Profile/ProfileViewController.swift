@@ -8,6 +8,9 @@
 import UIKit
 
 final class ProfileViewController: UIViewController {
+    
+    private let profileService = ProfileService.shared
+    
     //MARK: - UI
     private lazy var profileStackView: UIStackView = {
         let stackView = UIStackView()
@@ -80,10 +83,24 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         
         setupViews()
+        updateProfileDetails(profile: profileService.profile)
     }
 
+}
+
+private extension ProfileViewController {
+    //MARK: - Update UI
+    func updateProfileDetails(profile: Profile?) {
+        guard let profile = profile else {
+            return
+        }
+        fullNameLabel.text = profile.name
+        nickNameLabel.text = profile.loginName
+        aboutLabel.text = profile.bio
+    }
+    
     // MARK: - Constraints
-    private func setupViews() {
+    func setupViews() {
         view.backgroundColor = UIColor(named: "YPBlack")
         view.addSubview(profileStackView)
         profileStackView.addArrangedSubview(headerStackView)
@@ -109,7 +126,7 @@ final class ProfileViewController: UIViewController {
 }
 
 // MARK: - Preview
-@available(iOS 17, *)
-#Preview() {
-    ProfileViewController()
-}
+//@available(iOS 17, *)
+//#Preview() {
+//    SplashViewController()
+//}

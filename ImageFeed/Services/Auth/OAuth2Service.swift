@@ -41,6 +41,16 @@ final class OAuth2Service {
     /// Finally, it calls the completion handler with the result of the token retrieval operation.
     /// network client
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        assert(Thread.isMainThread)
+
+        guard lastCode != code else {
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        
+        task?.cancel()
+        lastCode = code
+        
         guard
             let request = Endpoint.sendCode(code: code).request
         else {
@@ -54,18 +64,22 @@ final class OAuth2Service {
             case .success(let body):
                 let authToken = body.accessToken
                 self.authToken = authToken
+                print("DEBUG:", "Auth token stored: \(authToken)")
                 completion(.success(authToken))
             case .failure(let error):
                 completion(.failure(error))
             }
+            self.task = nil
+            self.lastCode = nil
         }
+        self.task = task
         task.resume()
     }
 }
 
 // MARK: - Network Client
-extension OAuth2Service {
-    private func makeOAuthToken(for request: URLRequest, completion: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) -> URLSessionTask {
+private extension OAuth2Service {
+     func makeOAuthToken(for request: URLRequest, completion: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) -> URLSessionTask {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return urlSession.data(for: request) { (result: Result<Data, Error>) in
@@ -73,6 +87,7 @@ extension OAuth2Service {
             case .success(let data):
                 do {
                     let body = try decoder.decode(OAuthTokenResponseBody.self, from: data)
+                    print("DEBUG:", "Decoded token: \(body)")
                     completion(.success(body))
                 }
                 catch {
