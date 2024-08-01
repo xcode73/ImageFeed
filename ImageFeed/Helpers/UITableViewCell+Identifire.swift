@@ -7,8 +7,9 @@
 
 import UIKit
 
+/// This extension provides a computed static property reuseIdentifier that returns the string representation of the class name.
 extension UITableViewCell {
-    /// Создает reuseIdentifier из названия файла типа UITableViewCell
+    
     static var reuseIdentifier: String {
         return String(describing: self)
     }
