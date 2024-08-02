@@ -80,14 +80,20 @@ extension AuthViewController: WebViewViewControllerDelegate {
             switch result {
             case .success:
                 self.delegate?.didAuthenticate(self)
-                print("DEBUG:", "AuthViewController Delegate called")
             case .failure:
-                // TODO [Sprint 11] Добавьте обработку ошибки
-                break
+                let alertModel = AlertModel(
+                    title: "Что-то пошло не так!",
+                    message: "Не удалось войти в систему.",
+                    buttons: ["OK"],
+                    identifier: "AuthError",
+                    completion: {
+                        vc.dismiss(animated: true)
+                    }
+                )
+                AlertPresenter.showAlert(on: self, model: alertModel)
             }
             
             vc.dismiss(animated: true)
-            print("DEBUG:", "WebViewViewController dismissed")
         }
     }
     

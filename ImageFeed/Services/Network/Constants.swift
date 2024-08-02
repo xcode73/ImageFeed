@@ -22,8 +22,4 @@ struct Constants {
         static let port: Int? = nil
         static let defaultBaseURL: URL = URL(staticString: "https://api.unsplash.com")
     }
-    
-    enum AccessToken {
-        static let shared = OAuth2TokenStorage()
-    }
 }

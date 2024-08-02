@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
     private let profileService = ProfileService.shared
+    private let imageService = ProfileImageService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     //MARK: - UI
     private lazy var profileStackView: UIStackView = {
@@ -34,6 +37,9 @@ final class ProfileViewController: UIViewController {
     private lazy var profilePhoto: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "img.photo")
+        imageView.tintColor = .ypGray
+        imageView.backgroundColor = .ypWhite
+        imageView.layer.cornerRadius = 35
         imageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -83,13 +89,23 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         
         setupViews()
+        
         updateProfileDetails(profile: profileService.profile)
+        profileImageServiceObserver = NotificationCenter.default.addObserver(
+            forName: ProfileImageService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateAvatar()
+        }
+        updateAvatar()
     }
-
 }
 
+//MARK: - Private
 private extension ProfileViewController {
-    //MARK: - Update UI
+
     func updateProfileDetails(profile: Profile?) {
         guard let profile = profile else {
             return
@@ -97,6 +113,65 @@ private extension ProfileViewController {
         fullNameLabel.text = profile.name
         nickNameLabel.text = profile.loginName
         aboutLabel.text = profile.bio
+    }
+    
+    func updateAvatar() {
+        guard
+            let profileImageURL = imageService.avatarURL,
+            let url = URL(string: profileImageURL)
+        else {
+            profilePhoto.image = UIImage(named: "ic.person.crop.circle.fill")
+
+            print("DEBUG",
+                  "[\(String(describing: self)).\(#function)]:",
+                  "Error:",
+                  "profile image URL is nil")
+            return
+        }
+        
+        let processor = RoundCornerImageProcessor(radius: .point(61))
+        let pngSerializer = FormatIndicatedCacheSerializer.png
+        
+        profilePhoto.kf.setImage(
+            with: url,
+            placeholder: UIImage(named: "ic.person.crop.circle.fill"),
+            options: [
+                .processor(processor),
+                .cacheSerializer(pngSerializer),
+                .transition(.fade(1))
+            ]
+        ) { result in
+            
+            switch result {
+            case .success(let value):
+                let cacheType: String
+                switch value.cacheType {
+                case .none:
+                    cacheType = "Network"
+                case .memory:
+                    cacheType = "Memory"
+                case .disk:
+                    cacheType = "Disk"
+                }
+                
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "Image - \(value.image)",
+                      "Loaded from - \(cacheType)",
+                      "Source - \(value.source)",
+                      separator: "\n")
+            case .failure(let error):
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "Error loading image:",
+                      error.localizedDescription)
+            }
+        }
+    }
+    
+    //MARK: - Actions
+    @objc private func logoutAction(sender: UIButton!) {
+        print("Logout button tapped")
     }
     
     // MARK: - Constraints
@@ -118,15 +193,10 @@ private extension ProfileViewController {
             profilePhoto.heightAnchor.constraint(equalToConstant: 70)
         ])
     }
-    
-    //MARK: - Actions
-    @objc private func logoutAction(sender: UIButton!) {
-        print("Logout button tapped")
-    }
 }
 
 // MARK: - Preview
-//@available(iOS 17, *)
-//#Preview() {
-//    SplashViewController()
-//}
+@available(iOS 17, *)
+#Preview() {
+    ProfileViewController()
+}

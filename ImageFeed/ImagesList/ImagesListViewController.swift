@@ -112,6 +112,6 @@ extension ImagesListViewController {
 @available(iOS 17, *)
 #Preview() {
     let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    let viewController = storyboard.instantiateViewController(withIdentifier: "ImageListVC") as! ImagesListViewController
+    let viewController = storyboard.instantiateViewController(withIdentifier: "ImagesListViewController") as! ImagesListViewController
     return viewController
 }

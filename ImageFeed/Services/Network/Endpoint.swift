@@ -12,6 +12,7 @@ enum Endpoint {
     case authorize(url: String = "/oauth/authorize")
     case sendCode(url: String = "/oauth/token", code: String)
     case getProfile(url: String = "/me", token: String)
+    case getProfileImage(url: String = "/users", token: String, username: String)
     
     var request: URLRequest? {
         guard let url = self.url else {
@@ -37,11 +38,9 @@ enum Endpoint {
     
     private var host: String {
         switch self {
-        case .authorize:
+        case .authorize, .sendCode:
             return Constants.API.oauthBaseURL
-        case .sendCode:
-            return Constants.API.oauthBaseURL
-        case .getProfile:
+        case .getProfile, .getProfileImage:
             return Constants.API.baseURL
         }
     }
@@ -54,6 +53,9 @@ enum Endpoint {
             return url
         case .getProfile(let url, _):
             return url
+        case .getProfileImage(let url, _, let username):
+            
+            return url + "/" + username
         }
     }
     
@@ -74,7 +76,7 @@ enum Endpoint {
                 URLQueryItem(name: "code", value: code),
                 URLQueryItem(name: "grant_type", value: "authorization_code")
             ]
-            case .getProfile:
+            case .getProfile, .getProfileImage:
             return []
         }
     }
@@ -85,18 +87,14 @@ enum Endpoint {
             return HTTP.Method.get.rawValue
         case .sendCode:
             return HTTP.Method.post.rawValue
-        case .getProfile:
+        case .getProfile, .getProfileImage:
             return HTTP.Method.get.rawValue
         }
     }
     
     private var httpBody: Data? {
         switch self {
-        case .authorize:
-            return nil
-        case .sendCode:
-            return nil
-        case .getProfile:
+        case .authorize, .sendCode, .getProfile, .getProfileImage:
             return nil
 //            do {
 //                let jsonPost = try JSONEncoder().encode(code)
@@ -122,20 +120,11 @@ private extension URLRequest {
                 HTTP.Headers.Value.applicationJson.rawValue,
                 forHTTPHeaderField: HTTP.Headers.Key.contentType.rawValue
             )
-        case .getProfile(_, let token):
+        case .getProfile(_, let token), .getProfileImage(_, let token, _):
             self.setValue(
                 HTTP.Headers.Value.bearer.rawValue + token,
                 forHTTPHeaderField: HTTP.Headers.Key.authorization.rawValue
             )
-//            if let token = Constants.AccessToken.shared.token {
-//                self.setValue(
-//                    HTTP.Headers.Value.bearer.rawValue + token,
-//                    forHTTPHeaderField: HTTP.Headers.Key.authorization.rawValue
-//                )
-//            } else {
-//                print("ERROR:", "Tried to get profile with no token")
-//                return
-//            }
         }
     }
 }

@@ -8,7 +8,9 @@
 import Foundation
 
 enum AuthServiceError: Error {
-    case invalidRequest
+    case tokenNotFound
+    case tokenExpired
+    case tokenInvalid
 }
 
 /// Fetch an OAuth token by making a network request
@@ -39,12 +41,13 @@ final class OAuth2Service {
     ///
     /// It uses the NetworkClient to perform the network request, and upon receiving a response, it decodes the token from the response data using a JSONDecoder.
     /// Finally, it calls the completion handler with the result of the token retrieval operation.
-    /// network client
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
 
-        guard lastCode != code else {
-            completion(.failure(AuthServiceError.invalidRequest))
+        guard
+            lastCode != code
+        else {
+            completion(.failure(NetworkError.duplicateRequest))
             return
         }
         
@@ -54,49 +57,26 @@ final class OAuth2Service {
         guard
             let request = Endpoint.sendCode(code: code).request
         else {
-            completion(.failure(AuthServiceError.invalidRequest))
+            completion(.failure(NetworkError.invalidRequest))
             fatalError("cannot create URL")
         }
         
-        let task = makeOAuthToken(for: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
             switch result {
-            case .success(let body):
-                let authToken = body.accessToken
+            case .success(let object):
+                let authToken = object.accessToken
                 self.authToken = authToken
-                print("DEBUG:", "Auth token stored: \(authToken)")
                 completion(.success(authToken))
             case .failure(let error):
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "Failed to fetch OAuth token:",
+                      error.localizedDescription)
                 completion(.failure(error))
             }
-            self.task = nil
-            self.lastCode = nil
         }
         self.task = task
         task.resume()
-    }
-}
-
-// MARK: - Network Client
-private extension OAuth2Service {
-     func makeOAuthToken(for request: URLRequest, completion: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) -> URLSessionTask {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return urlSession.data(for: request) { (result: Result<Data, Error>) in
-            switch result {
-            case .success(let data):
-                do {
-                    let body = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    print("DEBUG:", "Decoded token: \(body)")
-                    completion(.success(body))
-                }
-                catch {
-                    completion(.failure(NetworkError.decodingError(error)))
-                }
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
     }
 }

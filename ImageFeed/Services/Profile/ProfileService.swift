@@ -13,6 +13,7 @@ final class ProfileService {
     
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
+    private var lastToken: String?
     private(set) var profile: Profile?
     
     // MARK: - Init
@@ -23,53 +24,37 @@ final class ProfileService {
         assert(Thread.isMainThread)
         
         guard
+            lastToken != token
+        else {
+            completion(.failure(NetworkError.duplicateRequest))
+            return
+        }
+        
+        lastToken = token
+        
+        guard
             let request = Endpoint.getProfile(token: token).request
         else {
-            completion(.failure(AuthServiceError.invalidRequest))
+            completion(.failure(NetworkError.invalidRequest))
             fatalError("cannot create URL")
         }
-        print("DEBUG:", "Profile request headers \(request.allHTTPHeaderFields ?? [:])")
         
-        let task = makeProfileResult(for: request) { [weak self] result in
-            guard let self = self
-            else {
-                return
-            }
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
+            guard let self = self else { return }
             switch result {
-            case .success(let profileResult):
-                let profile = Profile(from: profileResult)
+            case .success(let object):
+                let profile = Profile(from: object)
                 self.profile = profile
                 completion(.success(profile))
             case .failure(let error):
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "Error while fetching profile:",
+                      error.localizedDescription)
                 completion(.failure(error))
             }
-            self.task = nil
         }
         self.task = task
         task.resume()
     }
-}
-
-// MARK: - Private
-private extension ProfileService {
-    func makeProfileResult(for request: URLRequest, completion: @escaping (Result<ProfileResult, Error>) -> Void) -> URLSessionTask {
-       let decoder = JSONDecoder()
-       decoder.keyDecodingStrategy = .convertFromSnakeCase
-       return urlSession.data(for: request) { (result: Result<Data, Error>) in
-           switch result {
-           case .success(let data):
-               do {
-                   let profileResult = try decoder.decode(ProfileResult.self, from: data)
-                   print("DEBUG:", "Profile decoded: \(profileResult)")
-                   completion(.success(profileResult))
-               }
-               catch {
-                   completion(.failure(NetworkError.decodingError(error)))
-               }
-               
-           case .failure(let error):
-               completion(.failure(error))
-           }
-       }
-   }
 }

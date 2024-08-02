@@ -8,11 +8,12 @@
 import Foundation
 
 enum NetworkError: Error {
-    case httpStatusCode(Int)
-    case urlRequestError(Error)
     case urlSessionError
+    case urlRequestError(Error)
     case invalidRequest
+    case duplicateRequest
     case decodingError(Error)
+    case httpStatusCode(Int)
     case badRequest
     case unauthorized
     case forbidden
@@ -35,31 +36,58 @@ extension URLSession {
             if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
                 switch statusCode {
                 case 200...299:
-                    print("DEBUG:", "Received success HTTP status code: \(statusCode)")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.success(data))
                 case 400:
-                    print("ERROR:", "Bad request \(statusCode)")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          NetworkError.badRequest,
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.badRequest))
                 case 401:
-                    print("ERROR:", "Unauthorized \(statusCode) - Invalid Access Token")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          NetworkError.unauthorized,
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.unauthorized))
                 case 403:
-                    print("ERROR:", "Forbidden \(statusCode)")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          NetworkError.forbidden,
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.forbidden))
                 case 404:
-                    print("ERROR:", "Not Found \(statusCode)")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          NetworkError.notFound,
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.notFound))
-                    
                 case 500, 503:
-                    print("ERROR:", "Internal Server Error \(statusCode)")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          NetworkError.serverError,
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.serverError))
                 default:
-                    print("ERROR:", "HTTP status code: \(statusCode)")
+                    print("DEBUG",
+                          "[\(String(describing: self)).\(#function)]:",
+                          NetworkError.httpStatusCode(statusCode),
+                          "- code \(statusCode)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
                 }
             } else if let error = error {
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      NetworkError.urlRequestError(error),
+                      error.localizedDescription)
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
             } else {
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      NetworkError.urlSessionError,
+                      "Unknown error")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         })
