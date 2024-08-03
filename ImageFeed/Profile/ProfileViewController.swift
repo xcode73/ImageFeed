@@ -10,11 +10,12 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
+    //MARK: - Properties
     private let profileService = ProfileService.shared
     private let imageService = ProfileImageService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
     
-    //MARK: - UI
+    //MARK: - UI Components
     private lazy var profileStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -91,6 +92,14 @@ final class ProfileViewController: UIViewController {
         setupViews()
         
         updateProfileDetails(profile: profileService.profile)
+        addProfileImageServiceObserver()
+        updateAvatar()
+    }
+}
+
+private extension ProfileViewController {
+    // MARK: - Update profile
+    func addProfileImageServiceObserver() {
         profileImageServiceObserver = NotificationCenter.default.addObserver(
             forName: ProfileImageService.didChangeNotification,
             object: nil,
@@ -99,13 +108,8 @@ final class ProfileViewController: UIViewController {
             guard let self = self else { return }
             self.updateAvatar()
         }
-        updateAvatar()
     }
-}
-
-//MARK: - Private
-private extension ProfileViewController {
-
+    
     func updateProfileDetails(profile: Profile?) {
         guard let profile = profile else {
             return
@@ -120,8 +124,7 @@ private extension ProfileViewController {
             let profileImageURL = imageService.avatarURL,
             let url = URL(string: profileImageURL)
         else {
-            profilePhoto.image = UIImage(named: "ic.person.crop.circle.fill")
-
+//            profilePhoto.image = UIImage(named: "ic.person.crop.circle.fill")
             print("DEBUG",
                   "[\(String(describing: self)).\(#function)]:",
                   "Error:",
@@ -170,7 +173,7 @@ private extension ProfileViewController {
     }
     
     //MARK: - Actions
-    @objc private func logoutAction(sender: UIButton!) {
+    @objc func logoutAction(sender: UIButton!) {
         print("Logout button tapped")
     }
     

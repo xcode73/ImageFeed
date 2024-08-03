@@ -50,7 +50,8 @@ final class ProfileService {
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       "Error while fetching profile:",
-                      error.localizedDescription)
+                      error.localizedDescription,
+                      separator: "\n")
                 completion(.failure(error))
             }
         }

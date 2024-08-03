@@ -17,7 +17,7 @@ enum AuthServiceError: Error {
 final class OAuth2Service {
     static let shared = OAuth2Service()
     
-    private let tokenStorage = OAuth2TokenStorage()
+    private let tokenStorage = OAuth2TokenStorage.shared
     private let urlSession = URLSession.shared
     
     private var lastCode: String?
@@ -63,17 +63,27 @@ final class OAuth2Service {
         
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
+            
             switch result {
             case .success(let object):
                 let authToken = object.accessToken
                 self.authToken = authToken
                 completion(.success(authToken))
+                DispatchQueue.main.async {
+                    self.task = nil
+                    self.lastCode = nil
+                }
             case .failure(let error):
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       "Failed to fetch OAuth token:",
-                      error.localizedDescription)
+                      error.localizedDescription,
+                      separator: "\n")
                 completion(.failure(error))
+                DispatchQueue.main.async {
+                    self.task = nil
+                    self.lastCode = nil
+                }
             }
         }
         self.task = task

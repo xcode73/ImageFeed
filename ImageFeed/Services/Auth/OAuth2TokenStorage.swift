@@ -5,23 +5,38 @@
 //  Created by Nikolai Eremenko on 09.07.2024.
 //
 
-import Foundation
+import SwiftKeychainWrapper
+
+private struct KeychainKeys {
+     static let tokenKey: String = "token"
+}
 
 final class OAuth2TokenStorage {
     
-    private let storage = UserDefaults.standard
-    private let tokenKey = "token"
+    static let shared = OAuth2TokenStorage()
+    
+    private init() {}
+    
+    private var keychainWrapper = KeychainWrapper.standard
     
     var token: String? {
         get {
-            storage.string(forKey: tokenKey)
+            keychainWrapper.string(forKey: KeychainKeys.tokenKey)
         }
         set {
             if let token = newValue {
-                storage.set(token, forKey: tokenKey)
+                let isSuccess = KeychainWrapper.standard.set(token, forKey: KeychainKeys.tokenKey)
+                guard isSuccess else {
+                    return
+                }
             } else {
-                storage.removeObject(forKey: tokenKey)
+                keychainWrapper.removeObject(forKey: KeychainKeys.tokenKey)
             }
         }
+    }
+    
+    /// Removes all keys from the keychain
+    func removeAllKeys() {
+        KeychainWrapper.standard.removeAllKeys()
     }
 }

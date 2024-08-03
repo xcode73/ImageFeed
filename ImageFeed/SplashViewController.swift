@@ -12,10 +12,10 @@ final class SplashViewController: UIViewController {
     // MARK: - Properties
     private let profileService = ProfileService.shared
     private let imageService = ProfileImageService.shared
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     private let oAuth2Service = OAuth2Service.shared
-    //    private let showAuthenticationScreenSegueIdentifier = "ShowAuth"
     
+    // MARK: - UI Components
     private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "ic.splashscreen")
@@ -43,7 +43,6 @@ final class SplashViewController: UIViewController {
 }
 
 private extension SplashViewController {
-    
     // MARK: - Navigation
     func switchToAuthViewController() {
         // storyboard
@@ -59,8 +58,6 @@ private extension SplashViewController {
         let navigationController = UINavigationController(rootViewController: authViewController)
         navigationController.modalPresentationStyle = .fullScreen
         present(navigationController, animated: true)
-        
-        // code
     }
     
     func switchToTabBarController() {
@@ -76,18 +73,18 @@ private extension SplashViewController {
     
     // MARK: - Fetching
     func fetchProfile(_ token: String) {
-        UIBlockingProgressHUD.show()
         profileService.fetchProfile(token) { [weak self] result in
-            UIBlockingProgressHUD.dismiss()
-            
             guard let self = self else { return }
             
             switch result {
             case .success(let profile):
-                fetchProfileImageURL(username: profile.username)
-                self.switchToTabBarController()
+                self.fetchProfileImageURL(username: profile.username)
             case .failure(let error):
-                print("ERROR:", "ProfileService error: \(error.localizedDescription)")
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "ProfileService error -",
+                      error.localizedDescription,
+                      separator: "\n")
                 break
             }
         }
@@ -100,13 +97,13 @@ private extension SplashViewController {
             switch result {
             case .success:
                 self.switchToTabBarController()
+                dismiss(animated: true)
             case .failure(let error):
                 print("ERROR:", "ProfileImageService error: \(error.localizedDescription)")
                 break
             }
         }
     }
-    
     
     // MARK: - Constraints
     func setupViews() {
@@ -124,15 +121,11 @@ private extension SplashViewController {
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
         
-        vc.dismiss(animated: true)
+        vc.navigationController?.popViewController(animated: true)
         
-        guard let token = storage.token else {
-            return
-        }
-        
+        guard let token = storage.token else { return }
+
         fetchProfile(token)
-        
-        switchToTabBarController()
     }
 }
 

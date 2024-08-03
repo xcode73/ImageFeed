@@ -25,14 +25,17 @@ extension URLSession {
                 catch {
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
-                          "Decoding error: \(error.localizedDescription), data: \(String(data: data, encoding: .utf8) ?? "")")
+                          "Decoding error: \(error.localizedDescription)",
+                          "data: \(String(data: data, encoding: .utf8) ?? "")",
+                          separator: "\n")
                     completion(.failure(NetworkError.decodingError(error)))
                 } 
             case .failure(let error):
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       NetworkError.urlRequestError(error),
-                      error.localizedDescription)
+                      error.localizedDescription,
+                      separator: "\n")
                 completion(.failure(error))
             }
         }

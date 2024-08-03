@@ -38,56 +38,65 @@ extension URLSession {
                 case 200...299:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.success(data))
                 case 400:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
                           NetworkError.badRequest,
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.badRequest))
                 case 401:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
                           NetworkError.unauthorized,
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.unauthorized))
                 case 403:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
                           NetworkError.forbidden,
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.forbidden))
                 case 404:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
                           NetworkError.notFound,
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.notFound))
                 case 500, 503:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
                           NetworkError.serverError,
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.serverError))
                 default:
                     print("DEBUG",
                           "[\(String(describing: self)).\(#function)]:",
                           NetworkError.httpStatusCode(statusCode),
-                          "- code \(statusCode)")
+                          "- code \(statusCode)",
+                          separator: "\n")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
                 }
             } else if let error = error {
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       NetworkError.urlRequestError(error),
-                      error.localizedDescription)
+                      error.localizedDescription,
+                      separator: "\n")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
             } else {
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       NetworkError.urlSessionError,
-                      "Unknown error")
+                      "Unknown error",
+                      separator: "\n")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         })

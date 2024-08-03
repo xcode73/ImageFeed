@@ -68,17 +68,17 @@ private extension AuthViewController {
 // MARK: - AuthViewControllerDelegate
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        
+        vc.navigationController?.popViewController(animated: true)
+        
         UIBlockingProgressHUD.show()
-        ProgressHUD.animate()
         
         fetchOAuthToken(code) { [weak self] result in
-            UIBlockingProgressHUD.dismiss()
-            ProgressHUD.dismiss()
-            
             guard let self = self else { return }
-            
+
             switch result {
             case .success:
+                UIBlockingProgressHUD.dismiss()
                 self.delegate?.didAuthenticate(self)
             case .failure:
                 let alertModel = AlertModel(
@@ -90,15 +90,14 @@ extension AuthViewController: WebViewViewControllerDelegate {
                         vc.dismiss(animated: true)
                     }
                 )
+                UIBlockingProgressHUD.dismiss()
                 AlertPresenter.showAlert(on: self, model: alertModel)
             }
-            
-            vc.dismiss(animated: true)
         }
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-        vc.dismiss(animated: true)
+        vc.navigationController?.popViewController(animated: true)
     }
 }
 

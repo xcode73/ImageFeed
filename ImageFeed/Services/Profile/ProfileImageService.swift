@@ -11,7 +11,7 @@ final class ProfileImageService {
     static let shared = ProfileImageService()
     
     private let urlSession = URLSession.shared
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     
     private var task: URLSessionTask?
     private(set) var avatarURL: String?
@@ -57,7 +57,8 @@ final class ProfileImageService {
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       "Error while fetching profile image url:",
-                      error.localizedDescription)
+                      error.localizedDescription,
+                      separator: "\n")
                 
                 completion(.failure(error))
             }
