@@ -33,7 +33,6 @@ final class SplashViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
         if let token = storage.token {
             fetchProfile(token)
         } else {
@@ -45,13 +44,8 @@ final class SplashViewController: UIViewController {
 private extension SplashViewController {
     // MARK: - Navigation
     func switchToAuthViewController() {
-        // storyboard
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard
-            let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthVC") as? AuthViewController
-        else {
-            return
-        }
+        
+        let authViewController = AuthViewController()
         
         authViewController.delegate = self
         
@@ -121,7 +115,7 @@ private extension SplashViewController {
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
         
-        vc.navigationController?.popViewController(animated: true)
+        vc.dismiss(animated: true)
         
         guard let token = storage.token else { return }
 

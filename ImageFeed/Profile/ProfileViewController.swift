@@ -12,6 +12,7 @@ final class ProfileViewController: UIViewController {
     
     //MARK: - Properties
     private let profileService = ProfileService.shared
+    private let storage = OAuth2TokenStorage.shared
     private let imageService = ProfileImageService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
     
@@ -48,12 +49,9 @@ final class ProfileViewController: UIViewController {
     
     private lazy var logoutButton: UIButton = {
         let button = UIButton()
-        
         button.setImage(UIImage(named: "ic.exit"), for: [])
         button.tintColor = UIColor(named: "YPRed")
-        // action
-        button.addTarget(self, action: #selector(logoutAction(sender:)), for: .touchUpInside)
-        
+        button.addTarget(self, action: #selector(logoutAction), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -125,10 +123,6 @@ private extension ProfileViewController {
             let url = URL(string: profileImageURL)
         else {
 //            profilePhoto.image = UIImage(named: "ic.person.crop.circle.fill")
-            print("DEBUG",
-                  "[\(String(describing: self)).\(#function)]:",
-                  "Error:",
-                  "profile image URL is nil")
             return
         }
         
@@ -156,7 +150,6 @@ private extension ProfileViewController {
                 case .disk:
                     cacheType = "Disk"
                 }
-                
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
                       "Image - \(value.image)",
@@ -173,8 +166,13 @@ private extension ProfileViewController {
     }
     
     //MARK: - Actions
-    @objc func logoutAction(sender: UIButton!) {
-        print("Logout button tapped")
+    @objc
+    func logoutAction() {
+        storage.removeTokenKey()
+        dismiss(animated: true)
+        print("DEBUG",
+              "[\(String(describing: self)).\(#function)]:",
+              "Logout button pressed")
     }
     
     // MARK: - Constraints
