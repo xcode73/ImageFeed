@@ -9,9 +9,7 @@ import Foundation
 
 struct Profile {
     let username: String
-    // конкатенация имени и фамилии пользователя
     let name: String
-    // username со знаком @ перед первым символом
     let loginName: String
     let bio: String?
     

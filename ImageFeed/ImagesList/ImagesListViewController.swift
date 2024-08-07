@@ -9,7 +9,7 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
     //MARK: - Properties
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    private let images: [String] = Array(0..<20).map{ "\($0)" }
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     
     private lazy var dateFormatter: DateFormatter = {
@@ -19,7 +19,16 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     
-    @IBOutlet private var tableView: UITableView!
+    //MARK: - UI Components
+    private lazy var tableView: UITableView = {
+        let view = UITableView()
+        view.delegate = self
+        view.dataSource = self
+        view.backgroundColor = .clear
+        view.separatorStyle = .none
+        view.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
+        return view
+    }()
     
     //MARK: - Lifecycle
     override func viewDidLoad() {
@@ -27,10 +36,8 @@ final class ImagesListViewController: UIViewController {
         
         overrideUserInterfaceStyle = .dark
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+        setupUI()
+        setupConstraints()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -42,7 +49,7 @@ final class ImagesListViewController: UIViewController {
                 assertionFailure("Invalid segue destination")
                 return
             }
-            let image = UIImage(named: photosName[indexPath.row])
+            let image = UIImage(named: images[indexPath.row])
             viewController.image = image
         } else {
             super.prepare(for: segue, sender: sender)
@@ -50,10 +57,27 @@ final class ImagesListViewController: UIViewController {
     }
 }
 
+private extension ImagesListViewController {
+    func setupUI() {
+        view.backgroundColor = .ypBlack
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    // MARK: - Constraints
+    func setupConstraints() {
+        NSLayoutConstraint.activate([
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+}
+
 // MARK: - UITableViewDataSource
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photosName.count
+        return images.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -72,7 +96,7 @@ extension ImagesListViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
+        guard let image = UIImage(named: images[indexPath.row]) else {
             return 0
         }
         
@@ -85,13 +109,18 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
+//        performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
+        let viewController = SingleImageViewController()
+        guard let image = UIImage(named: images[indexPath.row]) else { return }
+        viewController.image = image
+        viewController.modalPresentationStyle = .fullScreen
+        present(viewController, animated: true)
     }
 }
 
 extension ImagesListViewController {
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
+        guard let image = UIImage(named: images[indexPath.row]) else {
             return
         }
         
@@ -101,9 +130,9 @@ extension ImagesListViewController {
         let isLiked = indexPath.row % 2 == 0
         
         if isLiked {
-            cell.likeButton.tintColor = UIColor(named: "YPRed")
+            cell.likeButton.tintColor = .ypRed
         } else {
-            cell.likeButton.tintColor = UIColor(named: "YPWhiteAlpha50")
+            cell.likeButton.tintColor = .ypWhiteAlpha50
         }
     }
 }
@@ -111,7 +140,5 @@ extension ImagesListViewController {
 // MARK: - Preview
 @available(iOS 17, *)
 #Preview() {
-    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    let viewController = storyboard.instantiateViewController(withIdentifier: "ImagesListViewController") as! ImagesListViewController
-    return viewController
+    ImagesListViewController()
 }

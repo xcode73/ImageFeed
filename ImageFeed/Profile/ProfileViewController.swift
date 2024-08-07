@@ -177,7 +177,7 @@ private extension ProfileViewController {
     
     // MARK: - Constraints
     func setupViews() {
-        view.backgroundColor = UIColor(named: "YPBlack")
+        view.backgroundColor = .ypBlack
         view.addSubview(profileStackView)
         profileStackView.addArrangedSubview(headerStackView)
         profileStackView.addArrangedSubview(fullNameLabel)

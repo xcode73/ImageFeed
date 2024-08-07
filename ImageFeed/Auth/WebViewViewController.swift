@@ -24,28 +24,28 @@ final class WebViewViewController: UIViewController {
         preferences.javaScriptEnabled = false
         let configuration = WKWebViewConfiguration()
         configuration.preferences = preferences
-        let webView = WKWebView(frame: view.bounds, configuration: configuration)
-        webView.allowsBackForwardNavigationGestures = true
-        webView.allowsLinkPreview = false
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        return webView
+        let view = WKWebView(frame: view.bounds, configuration: configuration)
+        view.allowsBackForwardNavigationGestures = true
+        view.allowsLinkPreview = false
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private lazy var progressView: UIProgressView = {
-        let progressView = UIProgressView()
-        progressView.progress = 0.5
-        progressView.progressTintColor = .ypBlack
-        progressView.translatesAutoresizingMaskIntoConstraints = false
-        return progressView
+        let view = UIProgressView()
+        view.progress = 0.5
+        view.progressTintColor = .ypBlack
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private lazy var backButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "ic.backward"), for: [])
-        button.tintColor = UIColor(named: "YPBlack")
-        button.addTarget(self, action: #selector(switchToAuthViewController), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
+        let view = UIButton()
+        view.setImage(UIImage(named: "ic.backward"), for: [])
+        view.tintColor = UIColor(named: "YPBlack")
+        view.addTarget(self, action: #selector(switchToAuthViewController), for: .touchUpInside)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     // MARK: - Lifecycle

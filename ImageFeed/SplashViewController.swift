@@ -17,11 +17,11 @@ final class SplashViewController: UIViewController {
     
     // MARK: - UI Components
     private lazy var logoImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "ic.splashscreen")
-        imageView.tintColor = UIColor(named: "YPWhite")
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
+        let view = UIImageView()
+        view.image = UIImage(named: "ic.splashscreen")
+        view.tintColor = UIColor(named: "YPWhite")
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     // MARK: - Lifecycle
@@ -93,7 +93,11 @@ private extension SplashViewController {
                 self.switchToTabBarController()
                 dismiss(animated: true)
             case .failure(let error):
-                print("ERROR:", "ProfileImageService error: \(error.localizedDescription)")
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "ProfileImageService error -",
+                      error.localizedDescription,
+                      separator: "\n")
                 break
             }
         }

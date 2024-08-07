@@ -5,22 +5,22 @@
 //  Created by Nikolai Eremenko on 19.07.2024.
 //
 
-import UIKit
+//import UIKit
 import ProgressHUD
 
 final class UIBlockingProgressHUD {
-    private static var window: UIWindow? {
-        return UIApplication.shared.windows.first
-    }
-    
-    
+     
     static func show() {
-        window?.isUserInteractionEnabled = false
-        ProgressHUD.animate()
+        ProgressHUD.colorBackground = .ypBackground
+        ProgressHUD.animationType = .activityIndicator
+        ProgressHUD.colorAnimation = .ypBlack
+        ProgressHUD.colorHUD = .ypWhiteAlpha50
+        ProgressHUD.mediaSize = 51
+        ProgressHUD.marginSize = 10
+        ProgressHUD.animate(nil, interaction: false)
     }
     
     static func dismiss() {
-        window?.isUserInteractionEnabled = true
         ProgressHUD.dismiss()
     }
 }

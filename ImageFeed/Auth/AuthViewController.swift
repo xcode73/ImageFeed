@@ -12,8 +12,6 @@ protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController)
 }
 
-
-
 final class AuthViewController: UIViewController {
     // MARK: - Properties
     weak var delegate: AuthViewControllerDelegate?
@@ -21,63 +19,45 @@ final class AuthViewController: UIViewController {
     
     // MARK: - UI Components
     private lazy var authButton: UIButton = {
-        let button = UIButton()
-        button.layer.masksToBounds = true
-        button.layer.cornerRadius = 16
-        button.backgroundColor = .ypWhite
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
-        button.setTitleColor(.ypBlack, for: .normal)
-        button.setTitle("Войти", for: .normal)
-        button.addTarget(self, action: #selector(switchToWebViewController), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
+        let view = UIButton()
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 16
+        view.backgroundColor = .ypWhite
+        view.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
+        view.setTitleColor(.ypBlack, for: .normal)
+        view.setTitle("Войти", for: .normal)
+        view.addTarget(self, action: #selector(switchToWebViewController), for: .touchUpInside)
+        return view
     }()
     
     private lazy var logoImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "ic.unsplash")
-        imageView.tintColor = .ypWhite
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
+        let view = UIImageView()
+        view.image = UIImage(named: "ic.unsplash")
+        view.tintColor = .ypWhite
+        return view
     }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupViews()
-//        configureBackButton()
-
-//        show()
+        setupUI()
+        setupConstraints()
     }
-    
-//    private func show() {
-//    //        let symbol = "ic.loader"
-//        ProgressHUD.colorBackground = .ypBackground
-//        ProgressHUD.animationType = .activityIndicator
-//        
-//        ProgressHUD.colorAnimation = .ypBlack
-//        
-//        
-//        
-//        ProgressHUD.colorHUD = .ypWhiteAlpha50
-////        ProgressHUD.color = 
-//      
-//        
-//        ProgressHUD.mediaSize = 51
-//        ProgressHUD.marginSize = 13
-//        ProgressHUD.animate(nil, interaction: false)
-//        
-//        
-//    }
 }
 
 private extension AuthViewController {
-    
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
         oauth2Service.fetchOAuthToken(code) { result in
             completion(result)
         }
+    }
+    
+    func setupUI() {
+        view.backgroundColor = UIColor(named: "YPBlack")
+        view.addSubview(logoImageView)
+        view.addSubview(authButton)
+        view.subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
     }
     
     // MARK: - Actions
@@ -92,11 +72,7 @@ private extension AuthViewController {
     }
     
     // MARK: - Constraints
-    func setupViews() {
-        view.backgroundColor = UIColor(named: "YPBlack")
-        view.addSubview(logoImageView)
-        view.addSubview(authButton)
-        
+    func setupConstraints() {
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),

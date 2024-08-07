@@ -29,12 +29,16 @@ final class TabBarController: UITabBarController {
     }
     
     private func setupTabs() {
-        let storyboard = UIStoryboard(name: "Main", bundle: .main)
-        let imagesListViewController = storyboard.instantiateViewController(withIdentifier: "ImagesListViewController")
+        let imagesListViewController = ImagesListViewController()
+        imagesListViewController.tabBarItem = UITabBarItem(
+            title: nil,
+            image: UIImage(systemName: "rectangle.stack.fill"),
+            selectedImage: nil
+        )
         
         let profileViewController = ProfileViewController()
         profileViewController.tabBarItem = UITabBarItem(
-            title: "",
+            title: nil,
             image: UIImage(systemName: "person.crop.circle.fill"),
             selectedImage: nil
         )
