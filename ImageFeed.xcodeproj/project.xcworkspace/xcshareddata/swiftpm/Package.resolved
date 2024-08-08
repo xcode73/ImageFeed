@@ -1,5 +1,5 @@
 {
-  "originHash" : "30dac9323c5be458bdcf405598dd0036f5abd4474770e342b93896549b055c4e",
+  "originHash" : "8b6cb9e2d09358a6b1781f9a0ab4b51f4d20b13f6c3d21872ab1e79d659d7ae4",
   "pins" : [
     {
       "identity" : "kingfisher",
@@ -13,10 +13,10 @@
     {
       "identity" : "progresshud",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/xcode73/ProgressHUD.git",
+      "location" : "https://github.com/relatedcode/ProgressHUD.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "9a1639efc9b4075db77bd13383898c21c0bea583"
+        "revision" : "9364904a42cb25f58d026451140c4080a868e72e",
+        "version" : "14.1.3"
       }
     },
     {
