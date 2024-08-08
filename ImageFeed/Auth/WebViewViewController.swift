@@ -20,13 +20,8 @@ final class WebViewViewController: UIViewController {
     
     // MARK: - UI Components
     private lazy var webView: WKWebView = {
-        let preferences = WKPreferences()
-        preferences.javaScriptEnabled = false
         let configuration = WKWebViewConfiguration()
-        configuration.preferences = preferences
-        let view = WKWebView(frame: view.bounds, configuration: configuration)
-        view.allowsBackForwardNavigationGestures = true
-        view.allowsLinkPreview = false
+        let view = WKWebView(frame: .zero, configuration: configuration)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -133,6 +128,7 @@ private extension WebViewViewController {
 
 // MARK: - WKNavigationDelegate
 extension WebViewViewController: WKNavigationDelegate {
+    // @MainActor for iOS 18 only
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,

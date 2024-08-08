@@ -13,7 +13,6 @@ final class ProfileService {
     
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
-    private var lastToken: String?
     private(set) var profile: Profile?
     
     // MARK: - Init
@@ -22,15 +21,7 @@ final class ProfileService {
     // MARK: - Public methods
     func fetchProfile(_ token: String, completion: @escaping (Result<Profile, Error>) -> Void) {
         assert(Thread.isMainThread)
-        
-        guard
-            lastToken != token
-        else {
-            completion(.failure(NetworkError.duplicateRequest))
-            return
-        }
-        
-        lastToken = token
+        task?.cancel()
         
         guard
             let request = Endpoint.getProfile(token: token).request
@@ -41,11 +32,17 @@ final class ProfileService {
         
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             guard let self = self else { return }
+            
+            print("PROFILE REQUEST: \(request)")
+            
             switch result {
             case .success(let object):
                 let profile = Profile(from: object)
                 self.profile = profile
                 completion(.success(profile))
+                DispatchQueue.main.async {
+                    self.task = nil
+                }
             case .failure(let error):
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
@@ -53,6 +50,9 @@ final class ProfileService {
                       error.localizedDescription,
                       separator: "\n")
                 completion(.failure(error))
+                DispatchQueue.main.async {
+                    self.task = nil
+                }
             }
         }
         self.task = task

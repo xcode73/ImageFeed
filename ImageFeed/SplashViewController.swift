@@ -72,6 +72,14 @@ private extension SplashViewController {
             
             switch result {
             case .success(let profile):
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "Profile fetched",
+                      "Username: \(profile.username)",
+                      "Name: \(profile.name)",
+                      "LoginName: \(profile.loginName)",
+                      "Bio: \(profile.bio ?? "nil")",
+                      separator: "\n")
                 self.fetchProfileImageURL(username: profile.username)
             case .failure(let error):
                 print("DEBUG",
@@ -89,7 +97,12 @@ private extension SplashViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success:
+            case .success(let imageStringURL):
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "ProfileImageURL fetched",
+                      "URL: \(imageStringURL)",
+                      separator: "\n")
                 self.switchToTabBarController()
                 dismiss(animated: true)
             case .failure(let error):
@@ -118,12 +131,7 @@ private extension SplashViewController {
 // MARK: - AuthViewControllerDelegate
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
-        
         vc.dismiss(animated: true)
-        
-        guard let token = storage.token else { return }
-
-        fetchProfile(token)
     }
 }
 

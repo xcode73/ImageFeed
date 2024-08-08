@@ -10,9 +10,9 @@ import Foundation
 final class ProfileImageService {
     static let shared = ProfileImageService()
     
-    private let urlSession = URLSession.shared
     private let storage = OAuth2TokenStorage.shared
     
+    private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private(set) var avatarURL: String?
     
@@ -41,6 +41,8 @@ final class ProfileImageService {
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
             guard let self = self else { return }
             
+            print("PROFILE IMAGE REQUEST: \(request)")
+            
             switch result {
             case .success(let object):
                 let profileImageURL = object.profileImage.large
@@ -53,18 +55,22 @@ final class ProfileImageService {
                 )
                 
                 self.avatarURL = profileImageURL
+                DispatchQueue.main.async {
+                    self.task = nil
+                }
             case .failure(let error):
                 print("DEBUG",
                       "[\(String(describing: self)).\(#function)]:",
-                      "Error while fetching profile image url:",
+                      "Error while fetching profile image url!",
                       error.localizedDescription,
                       separator: "\n")
                 
                 completion(.failure(error))
+                DispatchQueue.main.async {
+                    self.task = nil
+                }
             }
-            self.task = nil
         }
-        
         self.task = task
         task.resume()
     }
