@@ -59,6 +59,20 @@ private extension AuthViewController {
         view.subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
     }
     
+    // MARK: - Alert
+    func showAuthAlert(vc: AuthViewController) {
+        let alertModel = AlertModel(
+            title: "Что-то пошло не так!",
+            message: "Не удалось войти в систему.",
+            buttons: ["OK"],
+            identifier: "AuthError",
+            completion: {
+                vc.dismiss(animated: true)
+            }
+        )
+        AlertPresenter.showAlert(on: self, model: alertModel)
+    }
+    
     // MARK: - Actions
     @objc
     func switchToWebViewController() {
@@ -101,17 +115,8 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 UIBlockingProgressHUD.dismiss()
                 self.delegate?.didAuthenticate(self)
             case .failure:
-                let alertModel = AlertModel(
-                    title: "Что-то пошло не так!",
-                    message: "Не удалось войти в систему.",
-                    buttons: ["OK"],
-                    identifier: "AuthError",
-                    completion: {
-                        vc.dismiss(animated: true)
-                    }
-                )
                 UIBlockingProgressHUD.dismiss()
-                AlertPresenter.showAlert(on: self, model: alertModel)
+                self.showAuthAlert(vc: self)
             }
         }
     }
