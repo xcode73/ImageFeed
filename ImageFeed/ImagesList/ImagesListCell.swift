@@ -10,14 +10,14 @@ import UIKit
 final class ImagesListCell: UITableViewCell {
     
     //MARK: - UI Components
-    lazy var cardView: UIView = {
+    private lazy var cardView: UIView = {
         let view = UIView()
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         return view
     }()
     
-    lazy var cardImageView: UIImageView = {
+    private lazy var cardImageView: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(named: "0")
         view.contentMode = .scaleAspectFill
@@ -26,7 +26,7 @@ final class ImagesListCell: UITableViewCell {
         return view
     }()
     
-    lazy var gradientView: GradientView = {
+    private lazy var gradientView: GradientView = {
         let view = GradientView()
         view.startColor = .ypGradient
         view.endColor = .clear
@@ -34,14 +34,14 @@ final class ImagesListCell: UITableViewCell {
         return view
     }()
     
-    lazy var likeButton: UIButton = {
+    private lazy var likeButton: UIButton = {
         let view = UIButton(type: .custom)
         view.setImage(UIImage(named: "ic.like"), for: .normal)
         view.tintColor = .ypWhiteAlpha50
         return view
     }()
     
-    lazy var dateLabel: UILabel = {
+    private lazy var dateLabel: UILabel = {
         let view = UILabel()
         view.font = .systemFont(ofSize: 13, weight: .regular)
         view.textColor = .ypWhite
@@ -58,6 +58,12 @@ final class ImagesListCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(with model: ImageCellModel) {
+        cardImageView.image = model.cardImageView
+        dateLabel.text = model.dateLabel
+        likeButton.tintColor = model.likeButtonColor
     }
 }
 

@@ -10,7 +10,6 @@ import UIKit
 final class ImagesListViewController: UIViewController {
     //MARK: - Properties
     private let images: [String] = Array(0..<20).map{ "\($0)" }
-    private let showSingleImageSegueIdentifier = "ShowSingleImage"
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -39,30 +38,32 @@ final class ImagesListViewController: UIViewController {
         setupUI()
         setupConstraints()
     }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showSingleImageSegueIdentifier {
-            guard
-                let viewController = segue.destination as? SingleImageViewController,
-                let indexPath = sender as? IndexPath
-            else {
-                assertionFailure("Invalid segue destination")
-                return
-            }
-            let image = UIImage(named: images[indexPath.row])
-            viewController.image = image
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
-    }
 }
 
 private extension ImagesListViewController {
+    // MARK: - UI
     func setupUI() {
         view.backgroundColor = .ypBlack
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
     }
+    
+    func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+        guard let image = UIImage(named: images[indexPath.row]) else {
+            return
+        }
+        
+        let isLiked = indexPath.row % 2 == 0
+        
+        let model = ImageCellModel(
+            cardImageView: image,
+            dateLabel: dateFormatter.string(from: Date()),
+            likeButtonColor: isLiked ? .ypRed : .ypWhiteAlpha50
+        )
+        
+        cell.configure(with: model)
+    }
+    
     // MARK: - Constraints
     func setupConstraints() {
         NSLayoutConstraint.activate([
@@ -81,15 +82,12 @@ extension ImagesListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: ImagesListCell.reuseIdentifier,
-            for: indexPath
-        ) as? ImagesListCell else {
+        if let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as? ImagesListCell {
+            configCell(for: cell, with: indexPath)
+            return cell
+        } else {
             return UITableViewCell()
         }
-
-        configCell(for: cell, with: indexPath)
-        return cell
     }
 }
 
@@ -109,31 +107,11 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
         let viewController = SingleImageViewController()
         guard let image = UIImage(named: images[indexPath.row]) else { return }
         viewController.image = image
         viewController.modalPresentationStyle = .fullScreen
         present(viewController, animated: true)
-    }
-}
-
-extension ImagesListViewController {
-    func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let image = UIImage(named: images[indexPath.row]) else {
-            return
-        }
-        
-        cell.cardImageView.image = image
-        cell.dateLabel.text = dateFormatter.string(from: Date())
-
-        let isLiked = indexPath.row % 2 == 0
-        
-        if isLiked {
-            cell.likeButton.tintColor = .ypRed
-        } else {
-            cell.likeButton.tintColor = .ypWhiteAlpha50
-        }
     }
 }
 

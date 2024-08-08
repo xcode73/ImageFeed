@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		910086CD2C64C9D100E63834 /* ImageCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910086CC2C64C9D100E63834 /* ImageCellModel.swift */; };
 		910AF9D82C5767BE00AC2520 /* ProfileImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910AF9D72C5767BE00AC2520 /* ProfileImageService.swift */; };
 		910AF9DA2C57680200AC2520 /* UserResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910AF9D92C57680200AC2520 /* UserResult.swift */; };
 		910DD47F2C0C3B9200D57949 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910DD47E2C0C3B9200D57949 /* AppDelegate.swift */; };
@@ -45,6 +46,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		910086CC2C64C9D100E63834 /* ImageCellModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCellModel.swift; sourceTree = "<group>"; };
 		910AF9D72C5767BE00AC2520 /* ProfileImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageService.swift; sourceTree = "<group>"; };
 		910AF9D92C57680200AC2520 /* UserResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserResult.swift; sourceTree = "<group>"; };
 		910DD47B2C0C3B9200D57949 /* ImageFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -189,6 +191,7 @@
 				910AF9D92C57680200AC2520 /* UserResult.swift */,
 				91DAF76F2C5B892300F88ECE /* ProfileImage.swift */,
 				91DAF76A2C5A8ED200F88ECE /* AlertModel.swift */,
+				910086CC2C64C9D100E63834 /* ImageCellModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 				9117F00B2C1AB16F0004D035 /* ProfileViewController.swift in Sources */,
 				9131B9842C2E8D9900C8F344 /* WebViewViewController.swift in Sources */,
 				91DAF7752C5BA52100F88ECE /* TabBarController.swift in Sources */,
+				910086CD2C64C9D100E63834 /* ImageCellModel.swift in Sources */,
 				917ACF3D2C4A352800434CE7 /* Profile.swift in Sources */,
 				91DAF76B2C5A8ED200F88ECE /* AlertModel.swift in Sources */,
 				91E7F05C2C3FA8B300D9515B /* OAuth2Service.swift in Sources */,
