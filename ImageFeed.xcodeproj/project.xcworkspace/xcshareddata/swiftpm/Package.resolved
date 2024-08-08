@@ -1,5 +1,5 @@
 {
-  "originHash" : "c699d6f8e7399406f9487ce24f7af3299d7ab329425983a19f943872137e725a",
+  "originHash" : "30dac9323c5be458bdcf405598dd0036f5abd4474770e342b93896549b055c4e",
   "pins" : [
     {
       "identity" : "kingfisher",
@@ -16,7 +16,7 @@
       "location" : "https://github.com/xcode73/ProgressHUD.git",
       "state" : {
         "branch" : "master",
-        "revision" : "63c590360722c9f5a35aafa9653d9cbe0fe10ec2"
+        "revision" : "9a1639efc9b4075db77bd13383898c21c0bea583"
       }
     },
     {
