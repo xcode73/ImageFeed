@@ -12,76 +12,112 @@ protocol AuthViewControllerDelegate: AnyObject {
 }
 
 final class AuthViewController: UIViewController {
-    private let showWebViewSegueIdentifier = "ShowWebView"
+    // MARK: - Properties
+    weak var delegate: AuthViewControllerDelegate?
     private let oauth2Service = OAuth2Service.shared
     
-    weak var delegate: AuthViewControllerDelegate?
+    // MARK: - UI Components
+    private lazy var authButton: UIButton = {
+        let view = UIButton()
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 16
+        view.backgroundColor = .ypWhite
+        view.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
+        view.setTitleColor(.ypBlack, for: .normal)
+        view.setTitle("Войти", for: .normal)
+        view.addTarget(self, action: #selector(switchToWebViewController), for: .touchUpInside)
+        return view
+    }()
     
-    @IBOutlet
-    private var authButton: UIButton! {
-        didSet {
-            authButton.layer.cornerRadius = 16
-        }
-    }
+    private lazy var logoImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "ic.unsplash")
+        view.tintColor = .ypWhite
+        return view
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureBackButton()
+        setupUI()
+        setupConstraints()
     }
 }
 
-extension AuthViewController {
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showWebViewSegueIdentifier {
-            guard
-                let webViewViewController = segue.destination as? WebViewViewController
-            else {
-                assertionFailure("Invalid destination \(showWebViewSegueIdentifier)")
-                return
-            }
-            webViewViewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
-    }
-}
-
-// MARK: - Private methods
 private extension AuthViewController {
-    private func configureBackButton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "ic.backward")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "ic.backward")
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YPBlack")
-    }
-    
-    private func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        oauth2Service.fetchOAuthToken(code: code) { result in
+    func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        oauth2Service.fetchOAuthToken(code) { result in
             completion(result)
         }
+    }
+    
+    func setupUI() {
+        view.backgroundColor = UIColor(named: "YPBlack")
+        view.addSubview(logoImageView)
+        view.addSubview(authButton)
+        view.subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+    }
+    
+    // MARK: - Alert
+    func showAuthAlert(vc: AuthViewController) {
+        let alertModel = AlertModel(
+            title: "Что-то пошло не так!",
+            message: "Не удалось войти в систему.",
+            buttons: ["OK"],
+            identifier: "AuthError",
+            completion: {
+                vc.dismiss(animated: true)
+            }
+        )
+        AlertPresenter.showAlert(on: self, model: alertModel)
+    }
+    
+    // MARK: - Actions
+    @objc
+    func switchToWebViewController() {
+        let webViewController = WebViewViewController()
+        
+        webViewController.delegate = self
+        
+        webViewController.modalPresentationStyle = .overFullScreen
+        present(webViewController, animated: true)
+    }
+    
+    // MARK: - Constraints
+    func setupConstraints() {
+        NSLayoutConstraint.activate([
+            logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            logoImageView.widthAnchor.constraint(equalToConstant: 60),
+            logoImageView.heightAnchor.constraint(equalToConstant: 60),
+            authButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            authButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            authButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -90),
+            authButton.heightAnchor.constraint(equalToConstant: 48)
+        ])
     }
 }
 
 // MARK: - AuthViewControllerDelegate
 extension AuthViewController: WebViewViewControllerDelegate {
-    
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        
+        vc.dismiss(animated: true)
+        
+        UIBlockingProgressHUD.show()
+        
         fetchOAuthToken(code) { [weak self] result in
             guard let self = self else { return }
-            
+
             switch result {
             case .success:
+                UIBlockingProgressHUD.dismiss()
                 self.delegate?.didAuthenticate(self)
-                print("DEBUG:", "AuthViewController Delegate called")
             case .failure:
-                // TODO [Sprint 11] Добавьте обработку ошибки
-                break
+                UIBlockingProgressHUD.dismiss()
+                self.showAuthAlert(vc: self)
             }
-            
-            vc.dismiss(animated: true)
-            print("DEBUG:", "WebViewViewController dismissed")
         }
     }
     
@@ -93,7 +129,5 @@ extension AuthViewController: WebViewViewControllerDelegate {
 // MARK: - Preview
 @available(iOS 17, *)
 #Preview() {
-    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    let viewController = storyboard.instantiateViewController(withIdentifier: "AuthVC") as! AuthViewController
-    return viewController
+    AuthViewController()
 }

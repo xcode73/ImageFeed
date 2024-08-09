@@ -5,23 +5,49 @@
 //  Created by Nikolai Eremenko on 09.07.2024.
 //
 
-import Foundation
+import SwiftKeychainWrapper
+
+private struct KeychainKeys {
+     static let tokenKey: String = "token"
+}
 
 final class OAuth2TokenStorage {
     
-    private let storage = UserDefaults.standard
-    private let tokenKey = "token"
+    static let shared = OAuth2TokenStorage()
+    
+    private init() {}
+    
+    private var keychainWrapper = KeychainWrapper.standard
     
     var token: String? {
         get {
-            storage.string(forKey: tokenKey)
+            keychainWrapper.string(forKey: KeychainKeys.tokenKey)
         }
         set {
             if let token = newValue {
-                storage.set(token, forKey: tokenKey)
+                let isSuccess = keychainWrapper.set(token, forKey: KeychainKeys.tokenKey)
+                guard isSuccess else {
+                    print("DEBUG:",
+                          "[\(String(describing: self)).\(#function)]:",
+                          "Error saving token to keychain",
+                          separator: "\n")
+                    return
+                }
             } else {
-                storage.removeObject(forKey: tokenKey)
+                keychainWrapper.removeObject(forKey: KeychainKeys.tokenKey)
             }
+        }
+    }
+    
+    /// Removes token key from the keychain
+    func removeTokenKey() {
+        let isSuccess = keychainWrapper.removeObject(forKey: KeychainKeys.tokenKey)
+        guard isSuccess else {
+            print("DEBUG:",
+                  "[\(String(describing: self)).\(#function)]:",
+                  "Error removing token from keychain",
+                  separator: "\n")
+            return
         }
     }
 }

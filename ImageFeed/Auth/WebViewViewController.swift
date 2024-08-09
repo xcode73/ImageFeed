@@ -9,76 +9,59 @@ import UIKit
 import WebKit
 
 protocol WebViewViewControllerDelegate: AnyObject {
-    /// WebViewViewController получил код
-    /// - Parameters:
-    ///   - vc: ViewController
-    ///   - code: код из url
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String)
-    /// пользователь нажал кнопку назад и отменил авторизацию
-    /// - Parameter vc: ViewController
     func webViewViewControllerDidCancel(_ vc: WebViewViewController)
 }
 
 final class WebViewViewController: UIViewController {
+    // MARK: - Properties
+    private var estimatedProgressObservation: NSKeyValueObservation?
     weak var delegate: WebViewViewControllerDelegate?
     
-    // MARK: - Outlets
-    @IBOutlet private var webView: WKWebView!
-    @IBOutlet private var progressView: UIProgressView!
+    // MARK: - UI Components
+    private lazy var webView: WKWebView = {
+        let configuration = WKWebViewConfiguration()
+        let view = WKWebView(frame: .zero, configuration: configuration)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var progressView: UIProgressView = {
+        let view = UIProgressView()
+        view.progress = 0.5
+        view.progressTintColor = .ypBlack
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var backButton: UIButton = {
+        let view = UIButton()
+        view.setImage(UIImage(named: "ic.backward"), for: [])
+        view.tintColor = UIColor(named: "YPBlack")
+        view.addTarget(self, action: #selector(switchToAuthViewController), for: .touchUpInside)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupUI()
+        setupConstraints()
         webView.navigationDelegate = self
         
         loadAuthView()
-        print("DEBUG:", "WebView loaded")
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        webView.addObserver(
-            self,
-            forKeyPath: #keyPath(WKWebView.estimatedProgress),
-            options: .new,
-            context: nil
-        )
-        updateProgress()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        webView.removeObserver(
-            self,
-            forKeyPath: #keyPath(WKWebView.estimatedProgress),
-            context: nil
-        )
-    }
-    
-    // MARK: - KVO
-    override func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey : Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
-        if keyPath == #keyPath(WKWebView.estimatedProgress) {
-            updateProgress()
-        } else {
-            super.observeValue(
-                forKeyPath: keyPath,
-                of: object,
-                change: change,
-                context: context
-            )
-        }
+        estimatedProgressObservation = webView.observe(
+                    \.estimatedProgress,
+                    options: [],
+                    changeHandler: { [weak self] _, _ in
+                        guard let self = self else { return }
+                        self.updateProgress()
+                    })
     }
 }
 
-// MARK: - Private
 private extension WebViewViewController {
     func loadAuthView() {
         guard let request = Endpoint.authorize().request else {
@@ -87,13 +70,7 @@ private extension WebViewViewController {
         }
         
         webView.load(request)
-        
         updateProgress()
-    }
-    
-    func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
     }
     
     func code(from navigationAction: WKNavigationAction) -> String? {
@@ -109,10 +86,49 @@ private extension WebViewViewController {
             return nil
         }
     }
+    
+    func updateProgress() {
+        progressView.progress = Float(webView.estimatedProgress)
+        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+    }
+    
+    func setupUI() {
+        view.backgroundColor = .ypWhite
+        view.addSubview(backButton)
+        view.addSubview(webView)
+        view.addSubview(progressView)
+        view.subviews.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+    }
+    
+    // MARK: - Actions
+    @objc
+    func switchToAuthViewController() {
+        delegate?.webViewViewControllerDidCancel(self)
+    }
+    
+    // MARK: - Constraints
+    func setupConstraints() {
+        NSLayoutConstraint.activate([
+            backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            backButton.widthAnchor.constraint(equalToConstant: 64),
+            backButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.topAnchor.constraint(equalTo: backButton.bottomAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            progressView.topAnchor.constraint(equalTo: backButton.bottomAnchor)
+        ])
+    }
 }
 
 // MARK: - WKNavigationDelegate
 extension WebViewViewController: WKNavigationDelegate {
+    // @MainActor for iOS 18 only
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
@@ -120,7 +136,6 @@ extension WebViewViewController: WKNavigationDelegate {
     ) {
         if let code = code(from: navigationAction) {
             delegate?.webViewViewController(self, didAuthenticateWithCode: code)
-            print("DEBUG:", "WebViewViewController Delegate called")
             decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)
@@ -131,7 +146,5 @@ extension WebViewViewController: WKNavigationDelegate {
 // MARK: - Preview
 @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 #Preview() {
-    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    let viewController = storyboard.instantiateViewController(withIdentifier: "WebVC") as! WebViewViewController
-    return viewController
+    WebViewViewController()
 }

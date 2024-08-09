@@ -7,16 +7,21 @@
 
 import Foundation
 
+enum AuthServiceError: Error {
+    case tokenNotFound
+    case tokenExpired
+    case tokenInvalid
+}
+
 /// Fetch an OAuth token by making a network request
 final class OAuth2Service {
-    static let shared = OAuth2Service(networkClient: NetworkClient())
+    static let shared = OAuth2Service()
     
-    private let tokenStorage = OAuth2TokenStorage()
-    private let networkClient: NetworkRouting
+    private let tokenStorage = OAuth2TokenStorage.shared
+    private let urlSession = URLSession.shared
     
-    private enum JSONError: Error {
-        case decodingError
-    }
+    private var lastCode: String?
+    private var task: URLSessionTask?
     
     private(set) var authToken: String? {
         get {
@@ -26,10 +31,8 @@ final class OAuth2Service {
             tokenStorage.token = newValue
         }
     }
-
-    private init(networkClient: NetworkRouting) {
-        self.networkClient = networkClient
-    }
+    
+    private init() { }
     
     /// Fetch an OAuth token by making a network request
     /// - Parameters:
@@ -38,36 +41,52 @@ final class OAuth2Service {
     ///
     /// It uses the NetworkClient to perform the network request, and upon receiving a response, it decodes the token from the response data using a JSONDecoder.
     /// Finally, it calls the completion handler with the result of the token retrieval operation.
-    /// network client
-    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let request = Endpoint.sendCode(code: code).request else {
+    func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        assert(Thread.isMainThread)
+
+        guard
+            lastCode != code
+        else {
+            completion(.failure(NetworkError.duplicateRequest))
+            return
+        }
+        
+        task?.cancel()
+        lastCode = code
+        
+        guard
+            let request = Endpoint.sendCode(code: code).request
+        else {
+            completion(.failure(NetworkError.invalidRequest))
             fatalError("cannot create URL")
         }
         
-        print("DEBUG:", "Auth request: \(request)")
-        
-        networkClient.fetch(request: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
             
             switch result {
-            case .success(let data):
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let oAuthToken = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    print("DEBUG:", "OAuth token: \(oAuthToken) decoded")
-                    let accessToken = oAuthToken.accessToken
-                    self.authToken = accessToken
-                    print("DEBUG:", "OAuth token: \(accessToken) stored in tokenStorage")
-                    completion(.success(oAuthToken.accessToken))
-                } catch {
-                    print("ERROR: JSON decoding error \(error.localizedDescription)")
-                    completion(.failure(JSONError.decodingError))
+            case .success(let object):
+                let authToken = object.accessToken
+                self.authToken = authToken
+                completion(.success(authToken))
+                DispatchQueue.main.async {
+                    self.task = nil
+                    self.lastCode = nil
                 }
             case .failure(let error):
+                print("DEBUG",
+                      "[\(String(describing: self)).\(#function)]:",
+                      "Failed to fetch OAuth token:",
+                      error.localizedDescription,
+                      separator: "\n")
                 completion(.failure(error))
-                print("ERROR: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.task = nil
+                    self.lastCode = nil
+                }
             }
         }
+        self.task = task
+        task.resume()
     }
 }
